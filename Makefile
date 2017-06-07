@@ -8,6 +8,18 @@ APP_NAME := "papernet"
 APP_INDEX_MAPPING_FILE := "$(CURDIR)/bleve/mapping.json"
 APP_DATA_DIR := "$(CURDIR)/data"
 
+## WEB-UI
+APP_WEBUI_DIR       	:= "webui"
+APP_WEBUI_PATH      	:= "$(CURDIR)/$(APP_WEBUI_DIR)"
+APP_WEBUI_VCS_URI   	:= "https://github.com/bobinette/papernet-front.git"
+APP_WEBUI_VCS_BRANCH	:= "master"
+
+## OPS
+APP_OPS_DIR       		:= "ops"
+APP_OPS_PATH      		:= "$(CURDIR)/$(APP_OPS_DIR)"
+APP_OPS_VCS_URI   		:= "https://github.com/bobinette/papernet-ops.git"
+APP_OPS_VCS_BRANCH		:= "master"
+
 UNTAGGED_IMAGES := "docker images -a | grep "none" | awk '{print $$3}'"
 DOCKER_USERNAME := "bobinette"
 DOCKER_IMAGE_NAME := "papernet"
@@ -348,13 +360,6 @@ shell: build ## start a shell inside the build env
 dist:
 	@mkdir -p $(BIND_PATH)
 
-generate-webui: build-webui
-	if [ ! -d "static" ]; then \
-		mkdir -p static; \
-		docker run --rm -v "$$PWD/static":'/src/static' traefik-webui npm run build; \
-		echo 'For more informations show `webui/readme.md`' > $$PWD/static/DONT-EDIT-FILES-IN-THIS-DIRECTORY.md; \
-	fi
-
 lint:
 	script/validate-golint
 
@@ -364,6 +369,43 @@ fmt:
 index:
 	mkdir -p $(APP_DATA_DIR)
 	go run cmd/cli/*.go index create --index=$(APP_DATA_DIR)/$(APP_NAME).index --mapping=$(APP_INDEX_MAPPING_FILE)
+
+# https://newfivefour.com/git-subtree-basics.html
+
+#### WEB-UI
+webui-add:
+	@ if [ ! -d "$(APP_WEBUI_PATH)" ]; then \
+		git subtree add --prefix $(APP_WEBUI_DIR) $(APP_WEBUI_VCS_URI) $(APP_WEBUI_VCS_BRANCH) --squash ; \
+	  else \
+		echo "Skipping request as remote repository was already added $(APP_WEBUI_VCS_URI)"; \
+	  fi
+
+webui-update:
+	@git subtree pull --prefix $(APP_WEBUI_DIR) $(APP_WEBUI_VCS_URI) $(APP_WEBUI_VCS_BRANCH) --squash
+
+webui-push:
+	@git subtree push --prefix $(APP_WEBUI_DIR) $(APP_WEBUI_VCS_URI) $(APP_WEBUI_VCS_BRANCH)
+
+#### OPS
+ops-add:
+	@ if [ ! -d "$(APP_OPS_PATH)" ]; then \
+		git subtree add --prefix $(APP_OPS_DIR) $(APP_OPS_VCS_URI) $(APP_OPS_VCS_BRANCH) --squash ; \
+	  else \
+		echo "Skipping request as remote repository was already added $(APP_OPS_VCS_URI)"; \
+	  fi
+
+ops-update:
+	@git subtree pull --prefix $(APP_OPS_DIR) $(APP_OPS_VCS_URI) $(APP_OPS_VCS_BRANCH) --squash
+
+ops-push:
+	@git subtree push --prefix $(APP_OPS_DIR) $(APP_OPS_VCS_URI) $(APP_OPS_VCS_BRANCH)
+
+#generate-webui: build-webui
+#	if [ ! -d "static" ]; then \
+#		mkdir -p static; \
+#		docker run --rm -v "$$PWD/static":'/src/static' traefik-webui npm run build; \
+#		echo 'For more informations show `webui/readme.md`' > $$PWD/static/DONT-EDIT-FILES-IN-THIS-DIRECTORY.md; \
+#	fi
 
 clean_all: clean_bin clean_data # clean_deps
 
@@ -396,9 +438,11 @@ deps:
 	#@glide install --strip-vendor
 
 # docker targets
-docker-build:
+docker-dist:
 	@echo "Building docker image for $(APP_NAME)"
-	@docker build -t $(or $(TAG), $(DOCKER_USERNAME)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)) .
+	@docker-compose -f docker-compose.dev.yml build --no-cache backend_dev
+	@docker-compose -f docker-compose.dev.yml run backend_dev
+	#@docker build -t $(or $(TAG), $(DOCKER_USERNAME)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)) .
 	@echo "Done."
 
 docker-run:

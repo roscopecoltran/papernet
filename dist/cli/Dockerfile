@@ -1,7 +1,10 @@
 FROM scratch
 # FROM tianon/true
 MAINTAINER Rosco Pecoltran <rosco_pecoltran@msn.com>
-COPY ./papernet-cli /app/papernet-cli
+ADD ./conf /app/conf/
+COPY ./papernet_cli /app/papernet_cli
 ENV PATH=/app:$PATH
-ENTRYPOINT ["/app/papernet-cli"]
+VOLUME ["/app/data"]
+WORKDIR /app
+ENTRYPOINT ["/app/papernet_cli"]
 # CMD ["index", "create", "--index=./data/papernet.index", "--mapping=./data/mapping.json"]

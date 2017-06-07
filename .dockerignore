@@ -2,8 +2,13 @@ data/*
 !data/mapping.json
 
 ./dist
-!dist/cli/papernet-linux-amd64-cli
-!dist/web/papernet-linux-amd64-web
+
+!dist/cli/papernet_cli
+!dist/cli/conf/*
+
+!dist/web/papernet_web
+!dist/web/conf/*
+
 # site/
 
 vendor

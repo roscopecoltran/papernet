@@ -9,17 +9,20 @@ else
 	CASE=${1}
 fi
 
+export APP_CERTIFICATES="/app/configuration/certs"
+export APP_SSL_SELFSIGNED_BASENAME="${PROJECT_NAME}_self-signed"
+
 export APP_WEB="/dist/web/xc/linux/${PROJECT_NAME}-linux-amd64-web"
 export APP_CLI="/dist/cli/xc/linux/${PROJECT_NAME}-linux-amd64-cli"
 
 if [ -f "${APP_CLI}" ];then
 	mkdir -p /dist/cli
-	cp ${APP_CLI} /dist/cli/${PROJECT_NAME}-cli
+	cp ${APP_CLI} /dist/cli/${PROJECT_NAME}_cli
 fi
 
 if [ -f "${APP_WEB}" ];then
 	mkdir -p /dist/web
-	cp ${APP_WEB} /dist/web/${PROJECT_NAME}-web
+	cp ${APP_WEB} /dist/web/${PROJECT_NAME}_web
 fi
 
 if [ -d "/tmp/go" ];then
@@ -61,12 +64,34 @@ if [ "$ENTRYPOINT_MODE" == "build_run" ];then
 	MYKE_EXECUTABLE=$(which myke)
 	MKJWK_EXECUTABLE=$(which mkjwk)		
 	BASH_EXECUTABLE=$(which bash)
+	OPENSSL_EXECUTABLE=$(which openssl)
+
 	set -e
 
 	if [ "${GIT_EXECUTABLE}" == "" ]; then
 		# --no-progress 
 		apk update 
 		apk --no-cache add git 
+	fi
+
+	if [ "${MKJWK_EXECUTABLE}" != "" ]; then
+		mkdir -p ${APP_CERTIFICATES}
+		cd ${APP_CERTIFICATES}
+		mkjwk
+		ls -l rsa_key 
+		ls -l rsa_key.jwk
+		cp -f rsa_key /dist/web/conf/${PROJECT_NAME}_rsa-key
+		cp -f rsa_key /dist/cli/conf/${PROJECT_NAME}_rsa-key
+		cp -f rsa_key.jwk /dist/cli/conf/${PROJECT_NAME}_rsa-key.jwk
+		cp -f rsa_key.jwk /dist/web/conf/${PROJECT_NAME}_rsa-key.jwk
+	fi
+
+	if [ "${OPENSSL_EXECUTABLE}" != "" ]; then
+		# rm -fR ${APP_CERTIFICATES}/${APP_SSL_SELFSIGNED_BASENAME}.*
+		openssl req -out ${APP_CERTIFICATES}/${APP_SSL_SELFSIGNED_BASENAME}.csr -subj "/C=US/ST=California/L=Los Angeles/O=Default Company Ltd" -new -newkey rsa:2048 -nodes -keyout ${APP_CERTIFICATES}/${APP_SSL_SELFSIGNED_BASENAME}.key
+		openssl req -x509 -sha256 -nodes -days 365 -subj "/C=US/ST=California/L=Los Angeles/O=Default Company Ltd" -newkey rsa:2048 -keyout ${APP_CERTIFICATES}/${APP_SSL_SELFSIGNED_BASENAME}.key -out ${APP_CERTIFICATES}/${APP_SSL_SELFSIGNED_BASENAME}.crt
+		cp -Rf ${APP_SSL_SELFSIGNED_BASENAME}.* /dist/web/conf/
+		cp -Rf ${APP_SSL_SELFSIGNED_BASENAME}.* /dist/cli/conf/
 	fi
 
 	APP_GIT_COMMIT=$(git rev-parse HEAD)
