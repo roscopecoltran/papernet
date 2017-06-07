@@ -1,6 +1,9 @@
 data/*
 !data/mapping.json
 
+# dist/cli/xc/*
+# dist/web/xc/*
+
 # Credentials
 oauth_*.json
 hs256.json
