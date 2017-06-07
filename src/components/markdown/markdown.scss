@@ -1,0 +1,32 @@
+@import '../../style/_colors.scss';
+@import "~bootstrap/scss/_variables.scss";
+
+.Markdown__Error {
+	display: block;
+	background: lighten($brand-danger, 35);
+
+	border: 1px solid $brand-danger;
+	border-radius: $border-radius;
+	padding: 10px;
+	margin: 10px;
+
+	text-align: center;
+	white-space: normal;
+
+	.Markdown__ErrorMessage {
+		margin-bottom: 5px;
+	}
+
+	.fa {
+		color: $brand-danger;
+	}
+}
+
+.Equation {
+	display: flex;
+	align-items: center;
+}
+
+.Equation__Equation {
+	flex: 1;
+}
