@@ -1,0 +1,5 @@
+---
+project: papernet-check-errors
+desc: discover required non-existent files
+discover:
+  - configuration/config.dev.toml

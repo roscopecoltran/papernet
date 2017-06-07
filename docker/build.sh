@@ -8,7 +8,7 @@ set -e
 # Set temp environment vars
 export GOPATH=/tmp/go
 export PATH=${PATH}:${GOPATH}/bin
-export BUILDPATH=${GOPATH}/src/${APP_PACKAGE_URI}
+export BUILDPATH=${GOPATH}/src/${PROJECT_VCS_PROVIDER}/${PROJECT_NAMESPACE}/${PROJECT_NAME}
 export PKG_CONFIG_PATH="/usr/lib/pkgconfig/:/usr/local/lib/pkgconfig/"
 
 if [ "$GOLANG_PKG_MANAGER" == "glide" ];then
@@ -26,7 +26,7 @@ elif [ "$GOLANG_PKG_MANAGER" == "godep" ];then
 fi
 
 # Install build deps
-apk update
+# apk update
 apk --no-cache --no-progress --virtual INTERACTIVE add ${ALPINE_PKG_INTERACTIVE}
 apk --no-cache --no-progress --virtual RUNTIME add ${ALPINE_PKG_RUNTIME} 
 apk --no-cache --no-progress --virtual BUILD add ${ALPINE_PKG_BUILD}
@@ -39,7 +39,6 @@ while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 # Get the git commit
 CURRENT_DIR=$(pwd)
 
-
 # If its dev mode, only build for ourself
 if [ "${TF_DEV}x" != "x" ]; then
     XC_OS=${XC_OS:-$(go env GOOS)}
@@ -49,10 +48,13 @@ fi
 # Determine the arch/os combos we're building for
 XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
 XC_OS=${XC_OS:-linux darwin windows freebsd openbsd}
+GOLANG_CROSS_BUILDER=${GOLANG_CROSS_BUILDER:-gox}
 
 # Install dependencies
 echo "==> Getting dependencies..."
-go get -v github.com/mitchellh/gox
+if [ "$GOLANG_CROSS_BUILDER" == "gox" ];then
+  go get -v github.com/mitchellh/gox
+fi
 
 if [ "$GOLANG_PKG_MANAGER" == "glide" ];then
   go get -v github.com/Masterminds/glide
@@ -79,13 +81,10 @@ fi
 
 # Delete the old dir
 echo "==> Removing old directory..."
-#rm -f /dist/cli/${APP_NAME}_*
-#rm -f /dist/dist/${APP_NAME}_*
 
 # Build!
 echo "==> Building..."
 set +e
-#    -output "/dist/{{.OS}}_{{.Arch}}/${APP_NAME}-{{.Dir}}" \
 
 if [ -d "$BUILDPATH/.git" ];then
   GIT_COMMIT=$(git rev-parse HEAD)
@@ -103,21 +102,15 @@ fi
 
 mkdir -p /dist
 
-gox -os="linux darwin" -arch="amd64" -ldflags "-X main.GitCommit ${GIT_COMMIT}${GIT_DIRTY}" -output /dist/crossbuild/{{.OS}}/{{.Dir}}/${APP_NAME}-{{.OS}}-{{.Arch}}-{{.Dir}} $(glide novendor)
-
-cp /dist/linux/cli/crossbuild/${APP_NAME}-linux-amd64-cli /bin/dist/cli/${APP_NAME}-linux-amd64-cli
-cp /dist/linux/web/crossbuild/${APP_NAME}-linux-amd64-web /bin/dist/cli/${APP_NAME}-linux-amd64-web
-
 # bug with os and arch parameters when passed as docker build arguments
-# gox -os="${XC_OS}" -arch="${XC_ARCH}" ${XC_LDFLAGS} -output \"/dist/{{.Dir}}/${APP_NAME}_{{.Dir}}_{{.OS}}_{{.Arch}}\" ${XC_SOURCE}
-
-set -e
+# gox -os="${XC_OS}" -arch="${XC_ARCH}" ${XC_LDFLAGS} -output \"/dist/{{.Dir}}/${PROJECT_NAME}_{{.Dir}}_{{.OS}}_{{.Arch}}\" ${XC_SOURCE}
+gox -os="linux darwin" -arch="amd64" -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" -output /dist/xc/{{.OS}}/{{.Dir}}/${PROJECT_NAME}-{{.OS}}-{{.Arch}}-{{.Dir}} $(glide novendor)
 
 # Make sure "papernet-papernet" is renamed properly
 for PLATFORM in $(find /dist -mindepth 1 -maxdepth 1 -type d); do
   set +e
-  mv ${PLATFORM}/${APP_NAME}-${APP_NAME}.exe ${PLATFORM}/${APP_NAME}.exe 2>/dev/null
-  mv ${PLATFORM}/${APP_NAME}-${APP_NAME} ${PLATFORM}/${APP_NAME} 2>/dev/null
+  mv ${PLATFORM}/${PROJECT_NAME}-${PROJECT_NAME}.exe ${PLATFORM}/${PROJECT_NAME}.exe 2>/dev/null
+  mv ${PLATFORM}/${PROJECT_NAME}-${PROJECT_NAME} ${PLATFORM}/${PROJECT_NAME} 2>/dev/null
   set -e
 done
 
@@ -130,13 +123,17 @@ case $(uname) in
 esac
 OLDIFS=$IFS
 
-if [ "$APP_GENERATE_AUTH" == "mkjwk" ];then
+if [ "$APP_PREBUILD_AUTH" == "mkjwk" ];then
   go get -v -u github.com/dqminh/organizer/mkjwk
   mkjwk
   ls -l rsa_key 
   ls -l rsa_key.jwk
-  mkdir -p /app/certs
-  cp -f rsa_key* /app/certs
+  mkdir -p /app/configuration/certs
+  cp -f rsa_key* /app/configuration/certs
+fi
+
+if [ "$APP_TASK_MANAGER" != "" ];then
+  go get -v -u ${APP_TASK_MANAGER}
 fi
 
 #IFS=: 
@@ -156,14 +153,16 @@ echo
 echo "==> Results:"
 ls -hl /dist/
 
-# Cleanup GOPATH
-# rm -r ${GOPATH}
+# cleanup
+if [ "${APP_PREBUILD_DEL}" == "true" ];then
 
-# Remove stack of deps 'BUILD'
-# apk --no-cache --no-progress del BUILD
+  # Cleanup GOPATH
+  rm -r ${GOPATH}
 
-# Remove build deps
-# for STACK_NAME in ${ALPINE_PKG_DEL_STACKS[@]}; do
-#   apk --no-cache --no-progress del ${STACK_NAME}
-# done
+  # Remove stack of deps 'BUILD'
+  # for STACK_NAME in ${ALPINE_PKG_DEL_STACKS[@]}; do
+    apk --no-cache del BUILD # --no-progress 
+  # done
+
+fi
 

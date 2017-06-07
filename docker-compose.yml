@@ -28,7 +28,7 @@ services:
     volumes:
     #  - papernet_data:/app/data
       - ./data:/app/data
-      - ./certs:/app/certs
+      - ./configuration/certs:/app/certs
     labels:
       - "org.label-schema.vendor=bobinette"
       - "org.label-schema.url=https://github.com/bobinette/papernet"
@@ -54,7 +54,7 @@ services:
     #  - papernet_data
     volumes:
       - ./data:/app/data
-      - ./certs:/app/certs
+      - ./configuration/certs:/app/certs
     #networks:
     #  - frontend
     #  - backend

@@ -4,10 +4,10 @@ services:
 
 ### Applications Code Container #############################
 
-  #data: 
-  #  image: tianon/true             # scratch base images are not working on AWS
-  #  volumes:
-  #    - ./data:/app/data           # shared volume for data and index mapping
+  data: 
+    image: tianon/true             # scratch base images are not working on AWS
+    volumes:
+      - ${PWD}/data:/app/data           # shared volume for data and index mapping
 
   backend_dev:    
     image: papernet-backend:alpine-go1.8-dev
@@ -16,25 +16,30 @@ services:
       context: .
       dockerfile: Dockerfile.build
       args:
-        - PREBUILD_ALL=true            # pre-install build dependencies, compile binaries, generate json key file, index 
+        - APP_PREBUILD_ALL=true    # pre-install build dependencies, compile binaries, generate json key file, index 
+        - APP_PREBUILD_DEL=false   # delete all build dependencies used during the pre-build step (default: apk + GOPATH)
+        - APP_PREBUILD_AUTH=mkjwk  # available options: mkjwk, google_oauth2 (not ready yet)
         - GOLANG_PKG_MANAGER=glide # available options: glide, godep
         - XC_BUILD=false           # if false, build binaries for linux/amd64 only. if true, cross-build for linux/darwin with arch 386/amd64. (optional, dependency with `gox`) 
         - XC_ARCH="amd64"          # available options (requires `gox`): amd64, 386, amd64p32, ppc64, ppc64le, arm, arm64. (optional, space separated)
         - XC_OS="linux"            # available options (requires `gox`): darwin,linux,freebsd,openbsd,windows,freebsd,netbsd,plan9,dragonfly,nacl,solaris,android
-        - APP_GENERATE_AUTH=mkjwk  # available options: mkjwk, google_oauth2 (not ready yet)
     environment:
+      - APP_INDEX_MAPPING_FILE=./configuration/mapping.json
+      - ENTRYPOINT_FALLBACK=true
+      - ENTRYPOINT_ECHO=true
       - ENTRYPOINT_MODE=build_run
-      - APP_INDEX_MAPPING_FILE=./data/mapping.json
     ports:
       - 1705:1705
     # restart: unless-stopped
-    command: ["./docker/entrypoint.sh", "xc"] # xc (cross-build),
+    command: ["./docker/entrypoint.sh", "xc"]   # xc (cross-build),
+    #depends_on: ["data"]
     networks:
      - default
     volumes:
-      - ./certs:/app/certs         # shared volume for SSL certificates
-      - ./dist:/dist               # will store all generated binaries
-      - ./data:/app/data           # shared volume for data and index mapping
+      - ${PWD}/configuration/certs:/app/certs       # shared volume for SSL certificates
+      - ${PWD}/dist:/dist                           # will store all generated binaries
+      - ${PWD}/data:/app/data                       # shared volume for data and index mapping
+      - ${PWD}/configuration:/app/configuration     # shared volume for data and index mapping
     labels:
       - "org.label-schema.vendor=bobinette"
       - "org.label-schema.url=https://github.com/bobinette/papernet"

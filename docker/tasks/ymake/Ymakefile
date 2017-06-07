@@ -1,0 +1,27 @@
+## YMAKEFILE for ymake itself
+
+variables:
+  gopath: echo $GOPATH
+  version: echo 0.4
+
+blocks:
+  # Build
+  default:
+    pattern: "(*).go" # pattern not really needed though, will result in ymake.go only
+    target: '{gopath}/bin/$1'
+    deps:
+      - "$1.go"
+      - "ymakefile/*.go"
+    cmd: go install -ldflags "-X main.VERSION={version}" github.com/nananas/$1 
+
+  release:
+    cmd:
+      - go build -ldflags "-s -X main.VERSION={version}" ymake.go
+      - echo "Now copy the ymake executable"
+    hide: yes
+
+  test:
+    cmd: cd test && ymake
+
+  package:
+    post: release
