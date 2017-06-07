@@ -1,0 +1,20 @@
+
+user: vagrant
+server_name: local-bobi.space
+api_server_name: api.local-bobi.space
+front_server_name: papernet.local-bobi.space
+ssl: false
+
+github:
+  username: bobinette
+  repository: papernet
+  repository_front: papernet-front
+  filename: papernet-linux-amd64
+  filename_front: papernet-front.zip
+
+hs256_key: hs256
+google:
+  client_id: pizza
+  client_secret: yolo
+  access_token: token
+  redirect_uri: tomate

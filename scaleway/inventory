@@ -1,0 +1,4 @@
+papernet ansible_ssh_host=51.15.141.48
+
+[papernet]
+papernet
