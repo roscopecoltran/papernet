@@ -1,3 +1,0 @@
-- hosts: papernet
-  roles:
-  - papernet

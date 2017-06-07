@@ -1,9 +1,0 @@
-[Unit]
-Description=Job that runs the papernet server
-
-[Service]
-WorkingDirectory=/var/www/papernet
-ExecStart=/var/www/papernet/papernet-web -env=prod
-
-[Install]
-WantedBy=multi-user.target
