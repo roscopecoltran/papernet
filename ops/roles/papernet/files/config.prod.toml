@@ -1,0 +1,33 @@
+# Dev configuration
+
+# ----------------------------------------
+# Auth service
+[auth]
+key = "configuration/hs256.json"
+
+[auth.cayley]
+store = "data/auth.graph"
+# Auth service
+# ----------------------------------------
+
+# ----------------------------------------
+# Oauth service
+[oauth]
+bolt="data/oauth.db"
+
+[oauth.auth]
+enabled=false
+
+[oauth.google]
+enabled=true
+file="configuration/oauth_google.json"
+# Oauth service
+# ----------------------------------------
+
+# ----------------------------------------
+# legacy
+[bolt]
+store = "data/papernet.db"
+
+[bleve]
+store = "data/papernet.index"
