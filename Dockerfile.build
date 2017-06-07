@@ -1,0 +1,43 @@
+FROM alpine:3.6
+MAINTAINER Rosco Pecoltran <rosco.pecoltran@msn.com>
+
+ARG APP_OWNER=bobinette
+ARG APP_NAME=papernet
+ARG APP_PACKAGE_URI=${APP_PACKAGE_URI:-"github.com/bobinette/papernet"}
+ARG APP_GENERATE_AUTH=${APP_PACKAGE_URI:-mkjwk}
+
+ARG GOLANG_PKG_MANAGER=${GOLAMG_PKG_MANAGER:-glide}
+ARG GOSU_VERSION=${GOSU_VERSION:-1.10}
+
+ARG ALPINE_PKG_BUILD="curl git mercurial bzr gcc musl-dev go g++ make openssl-dev libssh2-dev"
+ARG ALPINE_PKG_RUNTIME="ca-certificates openssl" 
+ARG ALPINE_PKG_INTERACTIVE="bash nano tree"
+ARG ALPINE_PKG_DEL_STACKS="INTERACTIVE BUILD"
+
+ARG XC_BUILD=${XC_BUILD:-false}
+ARG XC_ARCH=${XC_ARCH:-"386 amd64"}
+ARG XC_OS=${XC_OS:-"linux darwin"}
+
+# Install Gosu to /usr/local/bin/gosu
+ADD https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64 /usr/local/sbin/gosu
+
+ADD . /app
+WORKDIR /app
+
+# Copy source code to the container & build it
+# RUN go-wrapper download   # "go get -d -v ./..."
+# RUN go-wrapper install    # "go install -v ./..."
+
+# Install runtime dependencies & create runtime user
+RUN	chmod +x /usr/local/sbin/gosu \
+    && adduser -D app -h /data -s /bin/sh \
+    && if [ "${PREBUILD_ALL}" == "true" ];then chmod +x ./docker/build.sh; ./docker/build.sh; fi
+    
+# NSSwitch configuration file
+COPY docker/nsswitch.conf /etc/nsswitch.conf
+
+# Container configuration
+VOLUME ["/data", "/dist"]
+EXPOSE 1705
+
+CMD ["/usr/local/sbin/gosu", "app", "./entrypoint.sh"]
