@@ -1,0 +1,144 @@
+version: '2.1'
+
+services:
+
+### Applications Code Container #############################
+
+  #applications:
+  #  image: tianon/true
+  #  volumes:
+  #    - ${APPLICATION}:/var/www
+
+  onbuild_front:    
+    image: alpine-node6-onbuild-extended:latest
+    build: 
+      context: .
+      dockerfile: Dockerfile.onbuild
+
+  # backend
+  #  image: papernet-back
+  #  build:
+  #    context: Dockerfile.backend
+  #    args:
+  #      - APP_CONTAINER_MODE=dist # dev (default), dist,both
+  #      - PROJECT_URI="github.com/bobinette/papernet"
+  # user: bobinette
+  # privileged: true
+  # read_only: true
+  #  depends_on: ["onbuild_back"]
+  #  ports:
+  #    - 1705:1705
+  #  networks:
+  #    - frontend
+  #    - backend
+
+  frontend_dist: # Caddy based 
+    image: papernet-front
+    container_name: frontend_dev
+    build: 
+      context: app
+      dockerfile: Dockerfile
+    #hostname: papernet
+    # read_only: true
+    #extra_hosts:
+    #  - "dockerhost:${DOCKER_HOST_IP}"
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+    command: ["/usr/bin/caddy", "-conf", "/etc/Caddyfile"]
+    #network_mode: "host"
+    networks:
+     - default
+    #networks:
+    #  - frontend
+    #  - backend
+    #  - proxy-network
+    #labels:
+    #  - "bobinette.frontend.rule=Host:bobinette.papernet.online"
+
+  frontend_dev:    
+    image: papernet-front:alpine-nodejs-dev
+    container_name: frontend_dev2
+    build: 
+      context: .
+      dockerfile: Dockerfile.front.build
+    #hostname: papernet
+    #user: bobinette
+    # privileged: true
+    # read_only: true
+    #extra_hosts:
+    #  - "dockerhost:${DOCKER_HOST_IP}"
+    ports:
+      - 8081:8080
+    restart: unless-stopped
+    command: ["/bin/bash"]
+    networks:
+     - default
+    volumes:
+      - ./app:/dist
+    #  - papernet_data:/data
+    #  - ./docker/logs/rabbitmq:/logs
+    #command: ["npm","run","dev"]
+    #links:
+    #  - backend
+    #networks:
+    #  - frontend
+    #  - backend
+    #  - proxy-network
+    #labels:
+    #  - "bobinette.frontend.rule=Host:bobinette.papernet.online"
+
+### Networks Setup ############################################
+
+#networks:
+#  frontend:
+#    driver: "bridge"
+
+#  backend:
+#    driver: "bridge"
+
+  #proxy-network:
+  #  external:
+  #    name: proxy-network
+
+### Volumes Setup #############################################
+
+volumes:
+  papernet_data:
+    driver: 'local'
+
+#volumes:
+  #mysql:
+  #  driver: "local"
+  #percona:
+  #  driver: "local"
+  #mssql:
+  #  driver: "local"
+  #postgres:
+  #  driver: "local"
+  #memcached:
+  #  driver: "local"
+  #redis:
+  #  driver: "local"
+  #neo4j:
+  #  driver: "local"
+  #mariadb:
+  #  driver: "local"
+  #mongo:
+  #  driver: "local"
+  #minio:
+  #  driver: "local"
+  #rethinkdb:
+  #  driver: "local"
+  #phpmyadmin:
+  #  driver: "local"
+  #adminer:
+  #  driver: "local"
+  #aerospike:
+  #  driver: "local"
+  #caddy:
+  #  driver: "local"
+  #elasticsearch-data:
+  #  driver: "local"
+  #elasticsearch-plugins:
+  #  driver: "local"

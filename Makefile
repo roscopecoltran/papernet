@@ -444,8 +444,8 @@ docker-all: webui-add ops-add
 	@docker-compose -f docker-compose.dev.yml run backend_dev
 	@docker-compose -f docker-compose.yml build cli
 	@docker-compose -f docker-compose.yml build web
-	@docker-compose -f $(CURDIR)/webui/docker-compose.dev.yml build --no-cache frontend_dev
-	@docker-compose -f $(CURDIR)/webui/docker-compose.dev.yml run frontend_dev
+	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml build --no-cache frontend_dev
+	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml run frontend_dev
 	#@docker-compose -f docker-compose.yml build web
 	@echo "Done."
 

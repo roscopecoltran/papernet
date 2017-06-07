@@ -1,0 +1,11 @@
+:8080
+gzip
+log stdout
+errors stderr
+root /www/public
+git {
+	repo https://github.com/bobinette/papernet-front.git
+	path ../papernet-front
+	interval 86400
+	then /bin/sh /www/papernet-install.sh
+}
