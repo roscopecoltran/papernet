@@ -94,8 +94,8 @@ if [ "$ENTRYPOINT_MODE" == "build_run" ];then
 		cp -Rf ${APP_SSL_SELFSIGNED_BASENAME}.* /dist/cli/conf/
 	fi
 
-	APP_GIT_COMMIT=$(git rev-parse HEAD)
-	APP_GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
+	APP_GIT_COMMIT=$(cd /app && git rev-parse HEAD)
+	APP_GIT_DIRTY=$(cd /app && test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 
 	if [ "$ENTRYPOINT_ECHO" == true ];then
 

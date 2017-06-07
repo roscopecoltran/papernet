@@ -26,7 +26,6 @@ apk --no-cache --no-progress --virtual INTERACTIVE add ${ALPINE_PKG_INTERACTIVE}
 # yarn install
 npm install
 
-
 npm run build
 
 # Remove stack of deps 'BUILD'
