@@ -1,0 +1,80 @@
+version: '2.1'
+
+services:
+
+### Applications Code Container #############################
+
+  #data: 
+  #  image: tianon/true             # scratch base images are not working on AWS
+  #  volumes:
+  #    - ./data:/app/data           # shared volume for data and index mapping
+  
+  cli:
+    image: papernet-cli:scratch-latest
+    container_name: cli
+    build: 
+      context: ./dist/cli
+      dockerfile: Dockerfile.scratch
+    expose:
+      - 1705
+    # restart: unless-stopped
+    entrypoint: /app/papernet-linux-amd64-cli
+    # command: ["index", "create", "--index=/app/data/papernet.index", "--mapping=/app/data/mapping.json"]
+    networks:
+      - default
+    #volumes_from:
+    #  - papernet_data
+    #  - data
+    volumes:
+    #  - papernet_data:/app/data
+      - ./data:/app/data
+      - ./certs:/app/certs
+    labels:
+      - "org.label-schema.vendor=bobinette"
+      - "org.label-schema.url=https://github.com/bobinette/papernet"
+      - "org.label-schema.name=Papernet - CLI"
+      - "org.label-schema.description=Very simple tool to keep track of the papers you read."
+      - "org.label-schema.version=0.9.1"
+      - "org.label-schema.docker.schema-version=1.0"
+
+  web:
+    image: papernet-api:scratch-latest
+    container_name: web
+    build: 
+      context: ./dist/web
+      dockerfile: Dockerfile.scratch
+    ports:
+      - 1705:1705
+    restart: unless-stopped
+    entrypoint: /app/papernet-linux-amd64-web
+    # command: ["--port", "1705"]
+    networks:
+      - default
+    #volumes_from:
+    #  - papernet_data
+    volumes:
+      - ./data:/app/data
+      - ./certs:/app/certs
+    #networks:
+    #  - frontend
+    #  - backend
+    labels:
+      - "org.label-schema.vendor=bobinette"
+      - "org.label-schema.url=https://github.com/bobinette/papernet"
+      - "org.label-schema.name=Papernet - Web API"
+      - "org.label-schema.description=Very simple tool to keep track of the papers you read."
+      - "org.label-schema.version=0.9.1"
+      - "org.label-schema.docker.schema-version=1.0"
+
+### Networks Setup ############################################
+
+networks:
+  backend:
+    driver: "bridge"
+
+### Volumes Setup #############################################
+
+volumes:
+  papernet_data:
+    driver: 'local'
+

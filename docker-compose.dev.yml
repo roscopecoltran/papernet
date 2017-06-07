@@ -1,0 +1,56 @@
+version: '2.1'
+
+services:
+
+### Applications Code Container #############################
+
+  #data: 
+  #  image: tianon/true             # scratch base images are not working on AWS
+  #  volumes:
+  #    - ./data:/app/data           # shared volume for data and index mapping
+
+  backend_dev:    
+    image: papernet-backend:alpine-go1.8-dev
+    container_name: backend_dev
+    build: 
+      context: .
+      dockerfile: Dockerfile.build
+      args:
+        - PREBUILD_ALL=true            # pre-install build dependencies, compile binaries, generate json key file, index 
+        - GOLANG_PKG_MANAGER=glide # available options: glide, godep
+        - XC_BUILD=false           # if false, build binaries for linux/amd64 only. if true, cross-build for linux/darwin with arch 386/amd64. (optional, dependency with `gox`) 
+        - XC_ARCH="amd64"          # available options (requires `gox`): amd64, 386, amd64p32, ppc64, ppc64le, arm, arm64. (optional, space separated)
+        - XC_OS="linux"            # available options (requires `gox`): darwin,linux,freebsd,openbsd,windows,freebsd,netbsd,plan9,dragonfly,nacl,solaris,android
+        - APP_GENERATE_AUTH=mkjwk  # available options: mkjwk, google_oauth2 (not ready yet)
+    environment:
+      - ENTRYPOINT_MODE=build_run
+      - APP_INDEX_MAPPING_FILE=./data/mapping.json
+    ports:
+      - 1705:1705
+    # restart: unless-stopped
+    command: ["./docker/entrypoint.sh", "xc"] # xc (cross-build),
+    networks:
+     - default
+    volumes:
+      - ./certs:/app/certs         # shared volume for SSL certificates
+      - ./dist:/dist               # will store all generated binaries
+      - ./data:/app/data           # shared volume for data and index mapping
+    labels:
+      - "org.label-schema.vendor=bobinette"
+      - "org.label-schema.url=https://github.com/bobinette/papernet"
+      - "org.label-schema.name=Papernet - Dev container"
+      - "org.label-schema.description=Very simple tool to keep track of the papers you read."
+      - "org.label-schema.version=0.9.1"
+      - "org.label-schema.docker.schema-version=1.0"
+
+### Networks Setup ############################################
+
+networks:
+  backend:
+    driver: "bridge"
+
+### Volumes Setup #############################################
+
+volumes:
+  papernet_data:
+    driver: 'local'
