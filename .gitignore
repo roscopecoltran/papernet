@@ -1,5 +1,5 @@
 data/*
-!dist/mapping.json
+!data/mapping.json
 
 # Credentials
 oauth_*.json
