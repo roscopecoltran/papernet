@@ -1,0 +1,45 @@
+package: github.com/bobinette/papernet
+homepage: https://github.com/bobinette/papernet
+license: MIT
+excludeDirs:
+- node_modules
+import:
+- package: github.com/BurntSushi/toml
+- package: github.com/PuerkitoBio/goquery
+- package: github.com/blevesearch/bleve
+  version: 024877f311eaf01cf75b308993ad7fb7880aa4f7
+  subpackages:
+  - analysis/analyzer/keyword
+  - analysis/analyzer/simple
+  - analysis/lang/en
+  - mapping
+  - search/query
+- package: github.com/boltdb/bolt
+- package: github.com/cayleygraph/cayley
+  subpackages:
+  - graph
+  - graph/bolt
+  - graph/path
+  - quad
+- package: github.com/dgrijalva/jwt-go
+- package: github.com/gin-gonic/gin
+- package: github.com/go-kit/kit
+  subpackages:
+  - auth/jwt
+  - endpoint
+  - transport/http
+- package: github.com/sirupsen/logrus
+  repo: https://github.com/sirupsen/logrus.git
+- package: github.com/spf13/cobra
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
+  - require
+- package: golang.org/x/crypto
+  subpackages:
+  - bcrypt
+- package: golang.org/x/oauth2
+  subpackages:
+  - google
+#testImport:
+#- package: github.com/arschles/assert
