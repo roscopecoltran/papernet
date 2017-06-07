@@ -9,13 +9,13 @@ APP_INDEX_MAPPING_FILE := "$(CURDIR)/bleve/mapping.json"
 APP_DATA_DIR := "$(CURDIR)/data"
 
 ## WEB-UI
-APP_WEBUI_DIR       	:= "webui"
+APP_WEBUI_DIR       	:= "contrib/webui"
 APP_WEBUI_PATH      	:= "$(CURDIR)/$(APP_WEBUI_DIR)"
 APP_WEBUI_VCS_URI   	:= "https://github.com/bobinette/papernet-front.git"
 APP_WEBUI_VCS_BRANCH	:= "master"
 
 ## OPS
-APP_OPS_DIR       		:= "ops"
+APP_OPS_DIR       		:= "contrib/ops"
 APP_OPS_PATH      		:= "$(CURDIR)/$(APP_OPS_DIR)"
 APP_OPS_VCS_URI   		:= "https://github.com/bobinette/papernet-ops.git"
 APP_OPS_VCS_BRANCH		:= "master"
@@ -438,11 +438,15 @@ deps:
 	#@glide install --strip-vendor
 
 # docker targets
-docker-dist:
+docker-all: webui-add ops-add
 	@echo "Building docker image for $(APP_NAME)"
 	@docker-compose -f docker-compose.dev.yml build --no-cache backend_dev
 	@docker-compose -f docker-compose.dev.yml run backend_dev
-	#@docker build -t $(or $(TAG), $(DOCKER_USERNAME)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)) .
+	@docker-compose -f docker-compose.yml build cli
+	@docker-compose -f docker-compose.yml build web
+	@docker-compose -f $(CURDIR)/webui/docker-compose.dev.yml build --no-cache frontend_dev
+	@docker-compose -f $(CURDIR)/webui/docker-compose.dev.yml run frontend_dev
+	#@docker-compose -f docker-compose.yml build web
 	@echo "Done."
 
 docker-run:
