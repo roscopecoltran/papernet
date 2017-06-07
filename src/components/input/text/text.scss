@@ -1,0 +1,15 @@
+@import "~bootstrap/scss/_variables.scss";
+
+input.Text__InputField {
+	background: transparent;
+
+	outline: none;
+	border: none;
+	border-bottom: 1px solid $gray-lighter;
+
+	&:hover, &:focus {
+		border-color: $gray-light;
+	}
+
+	width: 100%;
+}
