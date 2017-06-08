@@ -17,3 +17,10 @@ webui-update:
 webui-push:
 	@git subtree push --prefix $(APP_WEBUI_DIR) $(APP_WEBUI_VCS_URI) $(APP_WEBUI_VCS_BRANCH)
 
+webui-docker:
+	@echo "Build Docker container 'DEV' for $(APP_NAME) front-end"
+	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml build --no-cache=$(DOCKER_BUILD_NOCACHE) frontend_dev
+	@echo "Building static version of $(APP_NAME) front-end"
+	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml run frontend_dev build
+	@ls -l $(CURDIR)/dist/front/content
+	@echo "Done."

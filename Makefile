@@ -65,7 +65,7 @@ DOCKERFILE_BACKEND_BASE_DIST	:= "scratch"
 DOCKERFILE_BACKEND_CLI_DIST 	:= "dist/cli/Dockerfile.$(DOCKERFILE_BACKEND_BASE_DIST)"
 DOCKERFILE_BACKEND_WEB_DIST 	:= "dist/web/Dockerfile.$(DOCKERFILE_BACKEND_BASE_DIST)"
 
-DOCKER_BUILD_NOCACHE			:= FALSE
+DOCKER_BUILD_NOCACHE			:= false
 
 DOCKER_USERNAME  				:= "$(APP_NAMESPACE)"
 DOCKER_IMAGE_NAME				:= "$(APP_NAME)"
@@ -165,11 +165,11 @@ deps:
 
 docker-build-all: webui-add ops-add
 	@echo "Building docker image for $(APP_NAME)"
-	@docker-compose -f docker-compose.dev.yml build backend_dev
+	@docker-compose -f docker-compose.dev.yml build --no-cache=$(DOCKER_BUILD_NOCACHE) backend_dev
 	#@docker-compose -f docker-compose.dev.yml run backend_dev xc
 	@docker-compose -f docker-compose.yml build cli
 	@docker-compose -f docker-compose.yml build web
-	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml build frontend_dev
+	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml build --no-cache=$(DOCKER_BUILD_NOCACHE) frontend_dev
 	#@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml run frontend_dev
 	#@docker-compose -f docker-compose.yml build web
 	@echo "Done."
@@ -178,16 +178,6 @@ docker-run:
 	@echo "Running docker container for $(APP_NAME)"
 	@docker run -t -i -v ${APP_DATA_DIR}:/data -p 0.0.0.0:1705:1705 $(or $(TAG), $(DOCKER_USERNAME)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG))
 	@echo "Done."
-
-# dcb: docker-compose-backend
-dcb-dev:
-	@echo "Running docker `development` container for $(APP_NAME), component `back-end`"
-	@docker-compose -f docker-compose.dev.yml run backend_dev
-
-# dcb: docker-compose-frontend
-dcf-dev:
-	@echo "Running docker `development` container for $(APP_NAME), component `front-end`"
-	@docker-compose -f docker-compose.dev.yml run frontend_dev
 
 docker-remove:
 	@echo "Removing existing docker image"

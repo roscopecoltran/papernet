@@ -10,6 +10,10 @@ hs256.json
 
 vendor/*
 
+addons
+addons/
+addons/**
+
 .idea
 .intellij
 *.iml
