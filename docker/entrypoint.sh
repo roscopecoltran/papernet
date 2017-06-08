@@ -1,12 +1,12 @@
 #!/bin/sh
 set -x
 set -e
-#set +e
 
 if [ "$ENTRYPOINT_MODE" == "" ];then
 	CASE=${ENTRYPOINT_MODE}
 else
 	CASE=${1}
+	ENTRYPOINT_ARGS=${@:2}
 fi
 
 export APP_CERTIFICATES="/app/configuration/certs"
@@ -128,7 +128,7 @@ case "$CASE" in
 		if [ "${GOLANG_EXECUTABLE}" == "" ]; then
 			APK_BUILD="curl git mercurial bzr gcc musl-dev go g++ make"
 			apk update 
-			apk --no-cache --virtual BUILD_DEPS add ${APK_BUILD} # --no-progress 
+			apk --no-cache --no-progress --virtual BUILD_DEPS add ${APK_BUILD}
 		fi
 
 		if [ "${GOX_EXECUTABLE}" == "" ]; then
@@ -153,24 +153,24 @@ case "$CASE" in
 
 		if [ -f "${APP_CLI}" ];then
 			mkdir -p /dist/cli
-			cp ${APP_CLI} /dist/cli/${PROJECT_NAME}-cli
+			cp ${APP_CLI} /dist/cli/${PROJECT_NAME}_cli
 		fi
 
 		if [ -f "${APP_WEB}" ];then
 			mkdir -p /dist/web
-			cp ${APP_WEB} /dist/web/${PROJECT_NAME}-web
+			cp ${APP_WEB} /dist/web/${PROJECT_NAME}_web
 		fi
 
 		if [ "$ENTRYPOINT_MODE" == "build_run" ];then	
 		  if [ -f "/dist/${PROJECT_NAME}-linux-amd64-${2:-cli}" ];then
-			  exec go /dist/${PROJECT_NAME}-linux-amd64-${2:-cli}
+			  exec go /dist/${PROJECT_NAME}-linux-amd64-${@:2}
 			elif [ "$ENTRYPOINT_FALLBACK" == true ]
 			then
 				if [ "${BASH_EXECUTABLE}" == "" ]; then
 					apk update 
 					apk --no-cache --no-progress add bash nano tree 
 				fi
-				exec /bin/bash
+				exec /bin/bash ${@:2}
 		  fi
 		fi
 
@@ -180,7 +180,7 @@ case "$CASE" in
 		if [ "${MKJWK_EXECUTABLE}" == "" ]; then
 		  go get -v -u github.com/dqminh/organizer/mkjwk
 		fi
-	  mkjwk
+	  mkjwk ${@:2}
 	  ls -l rsa_key 
 	  ls -l rsa_key.jwk
 	  mkdir -p /app/configuration/certs
@@ -190,18 +190,18 @@ case "$CASE" in
 	'cli')
 		if [ "$ENTRYPOINT_MODE" == "build_run" ];then	
 			GOOS=linux GOARCH=amd64 go build -o /dist/${PROJECT_NAME}-linux-amd64-cli cmd/cli/*.go
-			exec go /dist/${APP_NAME}-linux-amd64-cli $@
+			exec go /dist/${APP_NAME}-linux-amd64-cli ${@:2}
 		else
-			exec go run cmd/web/main.go $@
+			exec go run cmd/web/main.go ${@:2}
 		fi
 	;;
 
 	'web')
 		if [ "$ENTRYPOINT_MODE" == "build_run" ];then	
 		  GOOS=linux GOARCH=amd64 go build -o /dist/${PROJECT_NAME}-linux-amd64-web cmd/web/main.go
-		  exec go /dist/${PROJECT_NAME}-linux-amd64-web $@
+		  exec go /dist/${PROJECT_NAME}-linux-amd64-web ${@:2}
 		else
-		  exec go run cmd/web/main.go $@
+		  exec go run cmd/web/main.go ${@:2}
 		fi	
 
 	;;
@@ -210,24 +210,25 @@ case "$CASE" in
 		if [ "$ENTRYPOINT_MODE" == "build_run" ];then
 			GOOS=linux GOARCH=amd64 go build -o /dist/${PROJECT_NAME}-linux-amd64-cli cmd/cli/*.go
 			exec go /dist/${PROJECT_NAME}-linux-amd64-cli index create --index=${APP_DATA_DIR:-"/data"}/${PROJECT_NAME}.index --mapping=${APP_INDEX_MAPPING_FILE:-"./bleve/mapping.json"}
-		else
+		else			
+			#exec go run cmd/cli/*.go index create ${@:2}
 			exec go run cmd/cli/*.go index create --index=${APP_DATA_DIR:-"/data"}/${PROJECT_NAME}.index --mapping=${APP_INDEX_MAPPING_FILE:-"./bleve/mapping.json"}
 		fi
 	;;
 
 	'bash')
 		if [ "${BASH_EXECUTABLE}" == "" ]; then
-			apk --update --no-cache add bash # --no-progress 
+			apk --update --no-progress --no-cache add bash # --no-progress 
 		fi
-		exec /bin/bash
+		exec /bin/bash ${@:2}
 
 	;;
 
 	'bashplus')
 		if [ "${BASH_EXECUTABLE}" == "" ]; then
-			apk --update --no-cache add bash nano tree # --no-progress 
+			apk --update --no-progress --no-cache add bash nano tree # --no-progress 
 		fi
-		exec /bin/bash
+		exec /bin/bash ${@:2}
 
 	;;
 
@@ -237,8 +238,10 @@ case "$CASE" in
 	;;
 
 	*)
-		exec sh $@
+		exec sh ${@:2}
 
 	;;
 
 esac
+
+exit $?

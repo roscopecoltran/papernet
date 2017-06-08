@@ -30,11 +30,12 @@ services:
       - ENTRYPOINT_MODE=build_run
     ports:
       - 1705:1705
-    # restart: unless-stopped
-    command: ["./docker/entrypoint.sh", "xc"]   # xc (cross-build),
-    #depends_on: ["data"]
+    restart: unless-stopped
+    entrypoint: ["./docker/entrypoint.sh"]
+    command:    ["xc"]
     networks:
      - default
+    # depends_on: ["data"]
     volumes:
       - ${PWD}/configuration/certs:/app/certs       # shared volume for SSL certificates
       - ${PWD}/dist:/dist                           # will store all generated binaries
@@ -54,19 +55,17 @@ services:
     build: 
       context: contrib/webui
       dockerfile: Dockerfile.build
-    command: ["/bin/bash"]
+    command: ["./docker/entrypoint.sh", "build"] # dev, devv, build, bash, bashplus
     ports:
       - 8080:8080
     restart: unless-stopped
     networks:
      - default
     volumes:
-      - ./dist/front/content:/dist
+      - ./dist/front/content:/code/app
     depends_on: ["backend_dev"]
     links:
       - backend_dev
-    #extra_hosts:
-    #  - "dockerhost:${DOCKER_HOST_IP}"
     labels:
       - "org.label-schema.vendor=bobinette"
       - "org.label-schema.url=https://github.com/bobinette/papernet-front"

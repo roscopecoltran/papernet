@@ -11,8 +11,8 @@
 ## #################################################################
 
 ## local 
-APP_NAME        		:= "bobinette"
-APP_NAMESPACE   		:= "papernet"
+APP_NAME        		:= "papernet"
+APP_NAMESPACE   		:= "bobinette"
 APP_VCS_PROVIDER		:= "github.com"
 
 APP_VCS_URI				:= "$(APP_VCS_PROVIDERAPP_NAMESPACE)/$(APP_NAME)"
@@ -23,7 +23,8 @@ APP_ADDONS_DIR 			:= "$(CURDIR)/addons"
 
 TEST?=./...
 BIND_DIR 				:= "dist"
-BIND_PATH				:= "$(CURDIR)/dist"
+BIND_PATH				:= "$(CURDIR)/$(BIND_DIR)"
+DIST_PATH				:= "$(CURDIR)/$(BIND_DIR)"
 
 SCRIPTS_PATH     		:= $(CURDIR)/scripts
 CONFIG_CERTS_PATH		:= $(CURDIR)/configuration/certs
@@ -51,7 +52,7 @@ include $(CURDIR)/scripts/makefile/aggregate.mk
 include $(CURDIR)/scripts/makefile/experimental/*.mk
 
 ## sub-projects (official) addons helpers
-include $(CURDIR)/scripts/makefile/official/*.mk
+include $(CURDIR)/scripts/makefile/papernet.*.mk
 
 ## #################################################################
 ## Project docker info
@@ -60,18 +61,19 @@ include $(CURDIR)/scripts/makefile/official/*.mk
 ## docker
 DOCKERFILE_DEV					:= "build.Dockerfile"
 
+DOCKERFILE_DEFAULT_ENTRYPOINT	:= "bashpp"
+
 # scratch, true, alpine
 DOCKERFILE_BACKEND_BASE_DIST	:= "scratch" 
 DOCKERFILE_BACKEND_CLI_DIST 	:= "dist/cli/Dockerfile.$(DOCKERFILE_BACKEND_BASE_DIST)"
 DOCKERFILE_BACKEND_WEB_DIST 	:= "dist/web/Dockerfile.$(DOCKERFILE_BACKEND_BASE_DIST)"
 
-DOCKER_BUILD_NOCACHE			:= false
+DOCKER_BUILD_NOCACHE  			:= false
+DOCKER_BUILD_CACHE_ARG			:= $(if $(filter $(DOCKER_BUILD_NOCACHE),true), --no-cache)
 
 DOCKER_USERNAME  				:= "$(APP_NAMESPACE)"
 DOCKER_IMAGE_NAME				:= "$(APP_NAME)"
 DOCKER_IMAGE_TAG 				:= "latest"
-
-# DOCKER_WEBUI_HELPERS := FALSE
 
 DOCKER_ENVS := \
 	-e OS_ARCH_ARG \
@@ -91,15 +93,13 @@ DOCKER_RUN_OPTS     	:= $(PAPERNET_ENVS) $(PAPERNET_MOUNT) "$(PAPERNET_DEV_IMAGE
 DOCKER_RUN_APP      	:= docker run $(INTEGRATION_OPTS) -it $(DOCKER_RUN_OPTS)
 DOCKER_RUN_APP_NOTTY	:= docker run $(INTEGRATION_OPTS) -i $(DOCKER_RUN_OPTS)
 
+## sub-projects (official) addons helpers
+# include $(CURDIR)/scripts/makefile/docker*.mk
+include $(CURDIR)/scripts/makefile/docker.machine.mk
+
 # local targets
 default: binary
 all: deps cross
-
-#all: generate-webui build ## validate all checks, build linux binary, run all tests\ncross non-linux binaries
-#	$(DOCKER_RUN_PAPERNET) $(SCRIPTS_PATH)/make.sh
-
-#docker-image: binary ## build a docker papernet image
-#	docker build -t $(PAPERNET_IMAGE) .
 
 dist:
 	@mkdir -p $(BIND_PATH)
@@ -123,6 +123,10 @@ addons-import: readeef-add searx-add elasticfeed-add krakend-add
 	
 addons-update: readeef-update searx-update elasticfeed-update krakend-update
 
+docker.is.cache:
+	@echo "is docker using cache system?"
+	@echo " - DOCKER_BUILD_NOCACHE=$(DOCKER_BUILD_NOCACHE)"
+	@echo " - DOCKER_BUILD_CACHE_ARG=$(DOCKER_BUILD_CACHE_ARG)"
 
 #generate-webui: build-webui
 #	if [ ! -d "static" ]; then \
@@ -161,18 +165,27 @@ deps:
 	#@go get -u -v github.com/Masterminds/glide
 	#@glide install --strip-vendor
 
-# docker targets
+papernet.fetch.contribs: papernet.webui.fetch papernet.ops.fetch
 
-docker-build-all: webui-add ops-add
-	@echo "Building docker image for $(APP_NAME)"
-	@docker-compose -f docker-compose.dev.yml build --no-cache=$(DOCKER_BUILD_NOCACHE) backend_dev
-	#@docker-compose -f docker-compose.dev.yml run backend_dev xc
+docker.build.all: papernet.webui.add papernet.ops.add
+	@echo "Building docker dev image for $(APP_NAME) / backend (cache? $(DOCKER_BUILD_NOCACHE))"
+	@docker-compose -f docker-compose.dev.yml build $(DOCKER_BUILD_CACHE_ARG) backend_dev
 	@docker-compose -f docker-compose.yml build cli
 	@docker-compose -f docker-compose.yml build web
-	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml build --no-cache=$(DOCKER_BUILD_NOCACHE) frontend_dev
-	#@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml run frontend_dev
-	#@docker-compose -f docker-compose.yml build web
+	@echo "Building docker dev image for $(APP_NAME) / frontend (cache? $(DOCKER_BUILD_NOCACHE))"
+	@docker-compose -f docker-compose.dev.yml build $(DOCKER_BUILD_CACHE_ARG) frontend_dev
 	@echo "Done."
+
+docker.compose.build.dev: 
+	@echo "Building docker dev image for $(APP_NAME) / backend (cache? $(DOCKER_BUILD_NOCACHE))"
+	@docker-compose -f docker-compose.dev.yml build $(DOCKER_BUILD_CACHE_ARG) backend_dev
+	@echo "Building docker dev image for $(APP_NAME) / frontend (cache? $(DOCKER_BUILD_NOCACHE))"
+	@docker-compose -f docker-compose.dev.yml build $(DOCKER_BUILD_CACHE_ARG) frontend_dev
+
+docker.compose.build.dist: 
+	@docker-compose -f docker-compose.yml build cli
+	@docker-compose -f docker-compose.yml build web
+	@docker-compose -f docker-compose.yml build front
 
 docker-run:
 	@echo "Running docker container for $(APP_NAME)"

@@ -5,12 +5,14 @@
 
 # refs:
 # - https://github.com/amalucelli/makefile-for-docker
-# - 
 
 # .PHONY: docker.build docker.test docker.pkg
 
 SHARD=0
 SHARDS=1
+
+DOCKER_VERSION := $(shell docker --version | awk '{gsub(/,.*/,""); print $$3}')
+DOCKER_MINOR_VERSION := $(shell echo '$(DOCKER_VERSION)' | awk -F'.' '{print $$2}')
 
 # public or private docker registry
 REGISTRY ?= docker.io
@@ -124,6 +126,10 @@ $(docker_push)%: $(docker_pkg)%
 	docker tag $*:latest edxops/$*:latest
 	docker push edxops/$*:latest
 
+docker.is.cache:
+	@echo "is docker using cache system?"
+	@echo " - DOCKER_BUILD_NOCACHE=$(DOCKER_BUILD_NOCACHE)"
+	@echo " - DOCKER_BUILD_CACHE_ARG=$(DOCKER_BUILD_CACHE_ARG)"
 
 .build/%/Dockerfile.d: docker/build/%/Dockerfile Makefile
 	@mkdir -p .build/$*
@@ -145,5 +151,9 @@ $(docker_push)%: $(docker_pkg)%
 .build/%/Dockerfile.pkg: docker/build/%/Dockerfile Makefile
 	@mkdir -p .build/$*
 	@sed -E "s#FROM edxops/([^:]+)(:\S*)?#FROM \1:test#" $< > $@
+
+# https://github.com/jwilder/docker-squash
+docker.squash: check_golang
+	@go get -v github.com/jwilder/docker-squash
 
 -include $(foreach image,$(images),.build/$(image)/Dockerfile.d)

@@ -1,61 +1,75 @@
 #!/bin/sh
 set -x
+set +e
+
+GIT_EXECUTABLE=$(which git)
+BASH_EXECUTABLE=$(which bash)
+OPENSSL_EXECUTABLE=$(which openssl)
+NODEJS_EXECUTABLE=$(which node)
+NPM_EXECUTABLE=$(which npm)
+NCU_EXECUTABLE=$(which ncu)
+
 set -e
 
 case "$1" in
 
 	'npm')
-		exec npm $@
+		exec ${NPM_EXECUTABLE} ${@:2}
 	;;
 
-	'npm_run')
-		exec npm run $@
+	'run')
+		exec ${NPM_EXECUTABLE} run ${@:2}
 	;;
 
 	'build')
-		exec npm run build
+		exec ${NPM_EXECUTABLE} run build
 	;;
 
 	'dev')
-		exec npm run dev
+		exec ${NPM_EXECUTABLE} run dev
 	;;
 
 	'devv')
-		exec npm run dev:v
+		exec ${NPM_EXECUTABLE} run dev:v
 	;;
 
 	'jest')
-		exec npm run jest
+		exec ${NPM_EXECUTABLE} run jest
 	;;
 
-	'jest:u')
-		exec npm run jest:u
+	'jestu')
+		exec ${NPM_EXECUTABLE} run jest:u
 	;;
 
 	'lint')
-		exec npm run lint
+		exec ${NPM_EXECUTABLE} run lint
 	;;
 
 	'lintf')
-		exec npm run lint:f
+		exec ${NPM_EXECUTABLE} run lint:f
+	;;
+
+	'ping') 
+		exec ${NODEJS_EXECUTABLE} -e "console.log('pong')"
 	;;
 
 	'ncu') 
-		exec ncu > /code/app/packages.ncu.json
+		exec ${NCU_EXECUTABLE} > /code/app/packages.ncu.json
 	;;
 
 	'bash')
 		if [ "${BASH_EXECUTABLE}" == "" ]; then
 			apk --update --no-progress --no-cache add bash 
+			BASH_EXECUTABLE=$(which bash)
 		fi
-		exec /bin/bash
+		exec ${BASH_EXECUTABLE} ${@:2}
 	;;
 
 	'bashplus')
 		if [ "${BASH_EXECUTABLE}" == "" ]; then
 			apk --update --no-progress --no-cache add bash nano tree 
 		fi
-		exec /bin/bash
+		exec ${BASH_EXECUTABLE} ${@:2}
 	;;
 
 	'test')
@@ -63,7 +77,9 @@ case "$1" in
 	;;
 
 	*)
-		exec sh $@
+		exec sh ${@:2}
 	;;
 
 esac
+
+exit $?

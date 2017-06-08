@@ -3,12 +3,22 @@ data/*
 
 contrib
 contrib/
+contrib/*
 contrib/**
 
 addons
 addons/
+addons/*
 addons/**
 
+docker-compose.*
+*.md
+LICENSE
+
+scripts
+scripts/
+scripts/*
+scripts/**
 
 ./dist
 

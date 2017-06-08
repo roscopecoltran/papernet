@@ -3,7 +3,17 @@
 ## TITLE
 ## #################################################################
 
-SHELL := /bin/bash
+SHELL				:= $(shell which bash)
+
+CURRENT_DATE      	:= $(shell date +%D)
+CURRENT_LOCAL_USER	:= $(shell whoami)
+
+UNAME_S := $(shell uname -s)
+UNAME_S_TOLOWER := $(shell echo $(UNAME_S) | tr '[:upper:]' '[:lower:]')
+UNAME_S_TOUPPER := $(shell echo $(UNAME_S) | tr '[:lower:]' '[:upper:]')
+
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+MAKEFILE_DIR := $(dir $(MAKEFILE_PATH))
 
 # determine platform
 ifeq (Darwin, $(findstring Darwin, $(shell uname -a)))
@@ -42,6 +52,7 @@ IS_DOCKER_SWARM := $(if $(DOCKER_SWARM_EXEC_PATH), TRUE, FALSE)
 
 NODEJS_EXEC_PATH := $(shell which node)
 IS_NODEJS := $(if $(NODEJS_EXEC_PATH), TRUE, FALSE)
+# NODEJS_VERSION := $(shell node -v | cut -f 1,2 -d .)
 
 NPM_EXEC_PATH := $(shell which npm)
 IS_NPM := $(if $(NPM_EXEC_PATH), TRUE, FALSE)
@@ -73,12 +84,20 @@ IS_PIP2 := $(if $(PIP2_EXEC_PATH), TRUE, FALSE)
 PIP3_EXEC_PATH := $(shell which pip3)
 IS_PIP3 := $(if $(PIP3_EXEC_PATH), TRUE, FALSE)
 
-#CONDA_EXEC_PATH := $(shell which conda)
-#IS_CONDA := $(if $(CONDA_EXEC_PATH), TRUE, FALSE)
+CONDA_EXEC_PATH := $(shell which conda)
+IS_CONDA := $(if $(CONDA_EXEC_PATH), TRUE, FALSE)
 
-#MINICONDA_EXEC_PATH := $(shell which miniconda)
-#IS_MINICONDA := $(if $(MINICONDA_EXEC_PATH), TRUE, FALSE)
+MINICONDA_EXEC_PATH := $(shell which miniconda)
+IS_MINICONDA := $(if $(MINICONDA_EXEC_PATH), TRUE, FALSE)
 
 HOST_NAME := $(shell hostname -f)
-# CNIP=$(ip route get 8.8.8.8 | awk 'NR==1 {print $NF}')
 
+# This task allows restricting other tasks to be run only when platform versions match expectations
+err_platform_mismatch = Platform version mismatch: current: $(platform_v), required: $(platform_t)
+
+platform-version:
+	$(if platform_v, , $(error Failed to detect current platform via platform_v))
+	$(if platform_t, , $(error Target platform not specified - set it via platform_t))
+	$(if $(filter-out $(platform_v), $(platform_t)), $(error $(err_platform_mismatch)))
+
+.PHONY: platform-version

@@ -1,0 +1,7 @@
+docker-compose.*
+*.md
+LICENSE
+
+dist/bundle.js
+node_modules/**
+
