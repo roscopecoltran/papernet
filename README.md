@@ -91,7 +91,7 @@ This repository contains the backend of the Papernet project, for the front-end 
 
 You can also pull it using the git subtree command into the ./contrib/webui folder:
 ```bash
-make papernet.webui.pull  	# add or pull if already exists locally
+make papernet.webui.pull  	# add or pull subtree if already exists locally
 make papernet.webui.clean 	# remove all dist files generated into the ./dist/front/content folder.
 make papernet.webui.remove	# remove all Papernet Front files from your local repository clone
 ```
@@ -101,7 +101,7 @@ This repository contains the OPS helpers for the Papernet project, for the OPS h
 
 You can also pull it using the git subtree command into the ./contrib/ops folder:
 ```bash
-make papernet.ops.pull    	# add or pull if already exists locally
+make papernet.ops.pull    	# add or pull subtree if already exists locally
 make papernet.webui.remove	# remove all Papernet OPS files from your local repository clone
 ```
 
