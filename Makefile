@@ -8,6 +8,10 @@ APP_NAME := "papernet"
 APP_INDEX_MAPPING_FILE := "$(CURDIR)/bleve/mapping.json"
 APP_DATA_DIR := "$(CURDIR)/data"
 
+## #################################################################
+## Papernet - Contributions
+## #################################################################
+
 ## WEB-UI
 APP_WEBUI_DIR       	:= "contrib/webui"
 APP_WEBUI_PATH      	:= "$(CURDIR)/$(APP_WEBUI_DIR)"
@@ -20,6 +24,10 @@ APP_OPS_PATH      		:= "$(CURDIR)/$(APP_OPS_DIR)"
 APP_OPS_VCS_URI   		:= "https://github.com/bobinette/papernet-ops.git"
 APP_OPS_VCS_BRANCH		:= "master"
 
+## #################################################################
+## Papernet - Non-official addons (experiments)
+## #################################################################
+
 ## Addon - SEARX
 APP_ADDON_SEARX_DIR       		:= "addons/searx"
 APP_ADDON_SEARX_PATH      		:= "$(CURDIR)/$(APP_ADDON_SEARX_DIR)"
@@ -31,6 +39,18 @@ APP_ADDON_READEEF_DIR       		:= "addons/readeef"
 APP_ADDON_READEEF_PATH      		:= "$(CURDIR)/$(APP_ADDON_READEEF_DIR)"
 APP_ADDON_READEEF_VCS_URI   		:= "https://github.com/urandom/readeef.git"
 APP_ADDON_READEEF_VCS_BRANCH		:= "master"
+
+## Addon - ELASTICFEED
+APP_ADDON_ELASTICFEED_DIR       		:= "addons/elasticfeed"
+APP_ADDON_ELASTICFEED_PATH      		:= "$(CURDIR)/$(APP_ADDON_ELASTICFEED_DIR)"
+APP_ADDON_ELASTICFEED_VCS_URI   		:= "https://github.com/feedlabs/elasticfeed.git"
+APP_ADDON_ELASTICFEED_VCS_BRANCH		:= "master"
+
+## Addon - KRAKEND
+APP_ADDON_KRAKEND_DIR       		:= "addons/krakend"
+APP_ADDON_KRAKEND_PATH      		:= "$(CURDIR)/$(APP_ADDON_KRAKEND_DIR)"
+APP_ADDON_KRAKEND_VCS_URI   		:= "https://github.com/devopsfaith/krakend.git"
+APP_ADDON_KRAKEND_VCS_BRANCH		:= "master"
 
 UNTAGGED_IMAGES := "docker images -a | grep "none" | awk '{print $$3}'"
 DOCKER_USERNAME := "bobinette"
@@ -385,11 +405,41 @@ index:
 # https://newfivefour.com/git-subtree-basics.html
 
 
-contribs-import: webui-add ops-add 
+contribs-import: webui-add ops-add
 
-addons-import: readeef-add searx-add 
+addons-import: readeef-add searx-add elasticfeed-add krakend-add
 	
-addons-update: readeef-update searx-update 
+addons-update: readeef-update searx-update elasticfeed-update krakend-update
+
+# https://github.com/feedlabs/elasticfeed
+
+#### KRAKEND
+krakend-add:
+	@ if [ ! -d "$(APP_ADDON_KRAKEND_PATH)" ]; then \
+		git subtree add --prefix $(APP_ADDON_KRAKEND_DIR) $(APP_ADDON_KRAKEND_VCS_URI) $(APP_ADDON_KRAKEND_VCS_BRANCH) --squash ; \
+	  else \
+		echo "Skipping request as remote repository was already added $(APP_ADDON_KRAKEND_VCS_URI)"; \
+	  fi
+
+krakend-update:
+	@git subtree pull --prefix $(APP_ADDON_KRAKEND_DIR) $(APP_ADDON_KRAKEND_VCS_URI) $(APP_ADDON_KRAKEND_VCS_BRANCH) --squash
+
+krakend-push:
+	@git subtree push --prefix $(APP_ADDON_KRAKEND_DIR) $(APP_ADDON_KRAKEND_VCS_URI) $(APP_ADDON_KRAKEND_VCS_BRANCH)
+
+#### ELASTICFEED
+elasticfeed-add:
+	@ if [ ! -d "$(APP_ADDON_ELASTICFEED_PATH)" ]; then \
+		git subtree add --prefix $(APP_ADDON_ELASTICFEED_DIR) $(APP_ADDON_ELASTICFEED_VCS_URI) $(APP_ADDON_ELASTICFEED_VCS_BRANCH) --squash ; \
+	  else \
+		echo "Skipping request as remote repository was already added $(APP_ADDON_ELASTICFEED_VCS_URI)"; \
+	  fi
+
+elasticfeed-update:
+	@git subtree pull --prefix $(APP_ADDON_READEEF_DIR) $(APP_ADDON_READEEF_VCS_URI) $(APP_ADDON_READEEF_VCS_BRANCH) --squash
+
+elasticfeed-push:
+	@git subtree push --prefix $(APP_ADDON_READEEF_DIR) $(APP_ADDON_READEEF_VCS_URI) $(APP_ADDON_READEEF_VCS_BRANCH)
 
 #### READEEF
 readeef-add:
