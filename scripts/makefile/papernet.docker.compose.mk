@@ -23,12 +23,12 @@ papernet.docker.dist.all: docker.is.cache papernet.docker.dist.backend.build pap
 ## #################################################################
 ## BACK-END
 ## #################################################################
-papernet.docker.dist.backend.build: papernet.docker.dist.backend.cli.build papernet.docker.dist.backend.web.build
+papernet.docker.dist.backend.wrap: papernet.docker.dev.zone.backend.build papernet.docker.dist.backend.cli.wrap papernet.docker.dist.backend.web.wrap
 
-papernet.docker.dist.backend.cli.build:
+papernet.docker.dist.backend.cli.wrap:
 	@docker-compose -f docker-compose.yml build $(DOCKER_BUILD_CACHE_ARG) cli
 
-papernet.docker.dist.backend.web.build:
+papernet.docker.dist.backend.web.wrap:
 	@docker-compose -f docker-compose.yml build $(DOCKER_BUILD_CACHE_ARG) web
 
 papernet.docker.dev.zone.backend.build:

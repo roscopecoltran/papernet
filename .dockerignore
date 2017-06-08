@@ -5,19 +5,15 @@
 
 !data/mapping.json
 
+./scripts*
 ./contrib*
 ./addons*
 ./vendor*
-data/*
+./data/*
 
 docker-compose.*
 *.md
 LICENSE
-
-scripts
-scripts/
-scripts/*
-scripts/**
 
 ./dist
 

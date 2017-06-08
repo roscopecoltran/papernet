@@ -8,28 +8,36 @@ SHELL				:= $(shell which bash)
 CURRENT_DATE      	:= $(shell date +%D)
 CURRENT_LOCAL_USER	:= $(shell whoami)
 
-UNAME_S := $(shell uname -s)
-UNAME_S_TOLOWER := $(shell echo $(UNAME_S) | tr '[:upper:]' '[:lower:]')
-UNAME_S_TOUPPER := $(shell echo $(UNAME_S) | tr '[:lower:]' '[:upper:]')
+UNAME_S        		:= $(shell uname -s)
+UNAME_S_TOLOWER		:= $(shell echo $(UNAME_S) | tr '[:upper:]' '[:lower:]')
+UNAME_S_TOUPPER		:= $(shell echo $(UNAME_S) | tr '[:lower:]' '[:upper:]')
 
-MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-MAKEFILE_DIR := $(dir $(MAKEFILE_PATH))
+MAKEFILE_PATH		:= $(abspath $(lastword $(MAKEFILE_LIST)))
+MAKEFILE_DIR 		:= $(dir $(MAKEFILE_PATH))
 
 # determine platform
 ifeq (Darwin, $(findstring Darwin, $(shell uname -a)))
-  PLATFORM := OSX
-  OS := darwin
+  PLATFORM			:= OSX
+  OS      			:= darwin
 else
-  PLATFORM := Linux
-  OS := $(shell echo $(PLATFORM) | tr '[:upper:]' '[:lower:]')
+  PLATFORM			:= Linux
+  OS      			:= $(shell echo $(PLATFORM) | tr '[:upper:]' '[:lower:]')
 endif
 
 LBITS := $(shell $(CC) $(CFLAGS) -dM -E - </dev/null | grep -q "__LP64__" && echo 64 || echo 32)
 
 ifeq ($(LBITS), 64)
-	ARCH := amd64
+	ARCH			:= amd64
 else ifeq ($(LBITS), 32)
-	ARCH := 386
+	ARCH			:= 386
+endif
+
+# Handle linux/osx differences
+XARGS := xargs -r
+FIND_DEPTH := maxdepth
+ifeq ($(UNAME_S),Darwin)
+	XARGS := xargs
+	FIND_DEPTH := depth
 endif
 
 GIT_EXEC_PATH := $(shell which git)

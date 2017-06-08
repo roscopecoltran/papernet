@@ -3,6 +3,12 @@
 ## TITLE
 ## #################################################################
 
+## OPS
+APP_OPS_DIR       		:= "contrib/ops"
+APP_OPS_PATH      		:= "$(CURDIR)/$(APP_OPS_DIR)"
+APP_OPS_VCS_URI   		:= "https://github.com/bobinette/papernet-ops.git"
+APP_OPS_VCS_BRANCH		:= "master"
+
 papernet.ops.add:
 	@ if [ ! -d "$(APP_OPS_PATH)" ]; then \
 		git subtree add --prefix $(APP_OPS_DIR) $(APP_OPS_VCS_URI) $(APP_OPS_VCS_BRANCH) --squash ; \

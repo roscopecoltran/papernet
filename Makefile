@@ -29,9 +29,9 @@ BIND_PATH				:= "$(CURDIR)/$(BIND_DIR)"
 DIST_PATH				:= "$(CURDIR)/$(BIND_DIR)"
 
 # helpers dirs
-SCRIPTS_PATH		:= $(CURDIR)/scripts
+SCRIPTS_PATH			:= $(CURDIR)/scripts
 
-# helpers dirs
+# certs, auth files dirs
 CONFIG_CERTS_PATH		:= $(CURDIR)/configuration/certs
 
 ## #################################################################
@@ -40,16 +40,11 @@ CONFIG_CERTS_PATH		:= $(CURDIR)/configuration/certs
 
 ## build/deploy helpers
 include $(CURDIR)/scripts/makefile/env.mk
-include $(CURDIR)/scripts/makefile/auth.mk
+include $(CURDIR)/scripts/makefile/certs.mk
 include $(CURDIR)/scripts/makefile/help.mk
 include $(CURDIR)/scripts/makefile/git.mk
 include $(CURDIR)/scripts/makefile/golang.mk
 include $(CURDIR)/scripts/makefile/xc.mk	
-
-## sub-projects helpers
-include $(CURDIR)/scripts/makefile/contrib.mk
-include $(CURDIR)/scripts/makefile/experimental.mk
-include $(CURDIR)/scripts/makefile/aggregate.mk
 
 ## sub-projects experimental addons helpers
 include $(CURDIR)/scripts/makefile/experimental/*.mk
@@ -67,7 +62,6 @@ DOCKER_IMAGE_TAG 				:= "latest"
 DOCKERFILE_DEV               	:= "build.Dockerfile"
 DOCKERFILE_DEFAULT_ENTRYPOINT	:= "bashplus"
 
-# scratch, true, alpine
 DOCKERFILE_BACKEND_BASE_DIST	:= "scratch" 
 DOCKERFILE_BACKEND_CLI_DIST 	:= "dist/cli/Dockerfile.$(DOCKERFILE_BACKEND_BASE_DIST)"
 DOCKERFILE_BACKEND_WEB_DIST 	:= "dist/web/Dockerfile.$(DOCKERFILE_BACKEND_BASE_DIST)"
@@ -133,8 +127,8 @@ clean_data:
 
 binary:
 	@mkdir -p ./$(BIND_DIR)
-	@go build -o ./$(BIND_DIR)/web/papernet_web cmd/web/main.go
-	@go build -o ./$(BIND_DIR)/cli/papernet_cli cmd/cli/*.go
+	@go build -o ./$(BIND_DIR)/web/$(APP_NAME)_web cmd/web/main.go
+	@go build -o ./$(BIND_DIR)/cli/$(APP_NAME)_cli cmd/cli/*.go
 
 test-local:
 	@go test $(TEST) $(TESTARGS) -timeout=10s
