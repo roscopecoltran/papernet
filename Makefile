@@ -26,6 +26,12 @@ APP_ADDON_SEARX_PATH      		:= "$(CURDIR)/$(APP_ADDON_SEARX_DIR)"
 APP_ADDON_SEARX_VCS_URI   		:= "https://github.com/asciimoo/searx.git"
 APP_ADDON_SEARX_VCS_BRANCH		:= "master"
 
+## Addon - READEEF
+APP_ADDON_READEEF_DIR       		:= "addons/readeef"
+APP_ADDON_READEEF_PATH      		:= "$(CURDIR)/$(APP_ADDON_READEEF_DIR)"
+APP_ADDON_READEEF_VCS_URI   		:= "https://github.com/urandom/readeef.git"
+APP_ADDON_READEEF_VCS_BRANCH		:= "master"
+
 UNTAGGED_IMAGES := "docker images -a | grep "none" | awk '{print $$3}'"
 DOCKER_USERNAME := "bobinette"
 DOCKER_IMAGE_NAME := "papernet"
@@ -377,6 +383,27 @@ index:
 	go run cmd/cli/*.go index create --index=$(APP_DATA_DIR)/$(APP_NAME).index --mapping=$(APP_INDEX_MAPPING_FILE)
 
 # https://newfivefour.com/git-subtree-basics.html
+
+
+contribs-import: webui-add ops-add 
+
+addons-import: readeef-add searx-add 
+	
+addons-update: readeef-update searx-update 
+
+#### READEEF
+readeef-add:
+	@ if [ ! -d "$(APP_ADDON_READEEF_PATH)" ]; then \
+		git subtree add --prefix $(APP_ADDON_READEEF_DIR) $(APP_ADDON_READEEF_VCS_URI) $(APP_ADDON_READEEF_VCS_BRANCH) --squash ; \
+	  else \
+		echo "Skipping request as remote repository was already added $(APP_ADDON_READEEF_VCS_URI)"; \
+	  fi
+
+readeef-update:
+	@git subtree pull --prefix $(APP_ADDON_READEEF_DIR) $(APP_ADDON_READEEF_VCS_URI) $(APP_ADDON_READEEF_VCS_BRANCH) --squash
+
+readeef-push:
+	@git subtree push --prefix $(APP_ADDON_READEEF_DIR) $(APP_ADDON_READEEF_VCS_URI) $(APP_ADDON_READEEF_VCS_BRANCH)
 
 #### SEARX
 searx-add:
