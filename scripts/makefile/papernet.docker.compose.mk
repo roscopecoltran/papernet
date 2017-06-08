@@ -18,7 +18,7 @@ papernet.docker.all: docker.is.cache papernet.docker.dev.all papernet.docker.dis
 papernet.docker.dev.all: docker.is.cache papernet.docker.dev.zone.backend.build papernet.docker.dev.zone.frontend.build
 
 # papernet.docker.dist.all: papernet.docker.dist.generated.cleanup papernet.docker.dist.backend.build papernet.docker.dist.frontend.build
-papernet.docker.dist.all: docker.is.cache papernet.docker.dist.backend.build papernet.docker.dist.frontend.build
+papernet.docker.dist.all: docker.is.cache papernet.docker.dist.backend.wrap papernet.docker.dist.backend.build papernet.docker.dist.frontend.build
 
 ## #################################################################
 ## BACK-END

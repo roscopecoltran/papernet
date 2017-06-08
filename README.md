@@ -6,6 +6,23 @@ Papernet is a very simple tool to keep track of the papers you read.
 
 # Setup
 
+## Docker
+
+### Docker-Compose
+
+Install pre-requisites:
+```bash
+brew install docker
+brew install docker-compose
+```
+
+Build Papernet Web-API & Front-end
+```bash
+make papernet.docker.all     	# will build dev containers (alpine 3.6), build dist files and wrap them into small containers (scratch or alpine 3.6)
+make papernet.docker.dev.all 	# will build dev containers (alpine 3.6), shared locally generated output
+make papernet.docker.dist.all	# build dist files from dev containers, wrap them into small containers (scratch or alpine 3.6)
+```
+
 ## Go
 Usual go installation (1.7.5)
 
