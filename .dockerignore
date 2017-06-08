@@ -1,6 +1,15 @@
 data/*
 !data/mapping.json
 
+contrib
+contrib/
+contrib/**
+
+addons
+addons/
+addons/**
+
+
 ./dist
 
 !dist/cli/papernet_cli

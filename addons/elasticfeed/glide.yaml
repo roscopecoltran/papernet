@@ -1,0 +1,64 @@
+package: .
+import:
+- package: github.com/abbot/go-http-auth
+- package: github.com/astaxie/beego
+  subpackages:
+  - context
+  - session
+  - toolbox
+- package: github.com/feedlabs/elasticfeed
+  subpackages:
+  - common
+  - common/config
+  - common/uuid
+  - elasticfeed
+  - elasticfeed/model
+  - event
+  - plugin
+  - plugin/model
+  - population
+  - resource
+  - service
+  - service/predict
+  - service/predict/v1/controller
+  - service/predict/v1/router
+  - service/store
+  - service/store/v1/controller
+  - service/store/v1/router
+  - service/store/v1/template
+  - service/store/v1/template/admin
+  - service/store/v1/template/application
+  - service/store/v1/template/entry
+  - service/store/v1/template/feed
+  - service/store/v1/template/org
+  - service/store/v1/template/token
+  - service/store/v1/template/workflow
+  - service/stream
+  - service/stream/controller
+  - service/stream/controller/channel
+  - service/stream/controller/room
+  - service/stream/model
+  - service/stream/router
+  - service/system
+  - service/system/v1/controller
+  - service/system/v1/router
+  - service/system/v1/template
+  - service/system/v1/template/plugin
+  - workflow
+- package: github.com/feedlabs/feedify
+  subpackages:
+  - context
+  - graph
+  - service
+  - stream
+- package: github.com/gorilla/websocket
+- package: github.com/hashicorp/go-msgpack
+  subpackages:
+  - codec
+- package: github.com/hashicorp/go-version
+- package: github.com/hashicorp/yamux
+- package: github.com/mitchellh/mapstructure
+- package: github.com/mitchellh/osext
+- package: github.com/mitchellh/packer
+  subpackages:
+  - common/json

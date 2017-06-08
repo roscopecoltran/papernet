@@ -1,4 +1,8 @@
 
+## #################################################################
+## TITLE
+## #################################################################
+
 yml_files:=$(shell find . -name "*.yml")
 json_files:=$(shell find . -name "*.json")
 # $(images) is calculated in the docker.mk file
@@ -27,3 +31,5 @@ clean: test.clean
 
 test.clean:
 	rm -rf playbooks/edx-east/test_output
+
+TEST?=./...

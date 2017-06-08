@@ -1,7 +1,77 @@
-.PHONY: docker.build docker.test docker.pkg
+
+## #################################################################
+## TITLE
+## #################################################################
+
+# refs:
+# - https://github.com/amalucelli/makefile-for-docker
+# - 
+
+# .PHONY: docker.build docker.test docker.pkg
 
 SHARD=0
 SHARDS=1
+
+# public or private docker registry
+REGISTRY ?= docker.io
+
+# version of the docker image
+VERSION ?= $(shell git describe --tags --always --dirty)
+
+# ports that docker needs to expose for a web ui container
+PORTS_WEBUI ?= -p 8080:8080
+
+# ports that docker needs to expose for a web ui container
+PORTS_API ?= -p 1705:1705
+
+# ensure that latest isn't use for build
+define isLatest
+	@[ $(VERSION) != "latest" ] || (echo "VERSION can't be latest in $(@)"; exit 1)
+endef
+
+UNTAGGED_IMAGES := "docker images -a | grep "none" | awk '{print $$3}'"
+
+ifeq ($(WEBUI_HELPERS), TRUE)
+
+# map user and group from host to container
+ifeq ($(PLATFORM), OSX)
+  CONTAINER_USERNAME = root
+  CONTAINER_GROUPNAME = root
+  HOMEDIR = /root
+  CREATE_USER_COMMAND =
+  COMPOSER_CACHE_DIR = ~/tmp/composer
+  BOWER_CACHE_DIR = ~/tmp/bower
+  GRUNT_CACHE_DIR = ~/tmp/grunt
+else
+  CONTAINER_USERNAME = dummy
+  CONTAINER_GROUPNAME = dummy
+  HOMEDIR = /home/$(CONTAINER_USERNAME)
+  GROUP_ID = $(shell id -g)
+  USER_ID = $(shell id -u)
+  CREATE_USER_COMMAND = \
+    groupadd -f -g $(GROUP_ID) $(CONTAINER_GROUPNAME) && \
+    useradd -u $(USER_ID) -g $(CONTAINER_GROUPNAME) $(CONTAINER_USERNAME) && \
+    mkdir -p $(HOMEDIR) &&
+  COMPOSER_CACHE_DIR = /var/tmp/composer
+  BOWER_CACHE_DIR = /var/tmp/bower
+  GRUNT_CACHE_DIR = /var/tmp/grunt
+endif
+
+# map SSH identity from host to container
+DOCKER_SSH_IDENTITY ?= ~/.ssh/id_rsa
+DOCKER_SSH_KNOWN_HOSTS ?= ~/.ssh/known_hosts
+ADD_SSH_ACCESS_COMMAND = \
+  mkdir -p $(HOMEDIR)/.ssh && \
+  test -e /var/tmp/id && cp /var/tmp/id $(HOMEDIR)/.ssh/id_rsa ; \
+  test -e /var/tmp/known_hosts && cp /var/tmp/known_hosts $(HOMEDIR)/.ssh/known_hosts ; \
+  test -e $(HOMEDIR)/.ssh/id_rsa && chmod 600 $(HOMEDIR)/.ssh/id_rsa ;
+
+# utility commands
+AUTHORIZE_HOME_DIR_COMMAND = chown -R $(CONTAINER_USERNAME):$(CONTAINER_GROUPNAME) $(HOMEDIR) &&
+EXECUTE_AS = sudo -u $(CONTAINER_USERNAME) HOME=$(HOMEDIR)
+
+endif
+
 
 dockerfiles:=$(shell ls docker/build/*/Dockerfile)
 all_images:=$(patsubst docker/build/%/Dockerfile,%,$(dockerfiles))

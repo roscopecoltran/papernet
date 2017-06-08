@@ -1,0 +1,35 @@
+**/krakend_gin*
+**/krakend_dns*
+**/krakend_mux*
+**/krakend_gorilla*
+**/krakend_negroni*
+**/krakend_httpcache*
+**/krakend_rss*
+**/krakend_jwt*
+server.rsa.crt
+server.rsa.key
+*.json
+*.yml
+*.toml
+#### joe made this: http://goel.io/joe
+
+#### go ####
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
+.glide/
+
+vendor
+vendor/
+vendor/**
+
