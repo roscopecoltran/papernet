@@ -1,0 +1,29 @@
+{% define "content" %}
+<link rel="import" href="/dist/polymer/polymer.html">
+
+<dom-module id="rf-api">
+    <script>
+Polymer({
+	is: 'rf-api',
+	properties: {
+		method: String,
+		args: Object,
+		receiver: Boolean,
+		tag: {
+			type: String,
+			value: ""
+		},
+		handlesErrors: Boolean,
+	},
+	behaviors: [
+		ConnectionAPIBehavior,
+	],
+
+	send: function(data) {
+		this.connection.send(this, data);
+	},
+
+});
+	</script>
+</dom-module>
+{% end %}
