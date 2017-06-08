@@ -94,9 +94,6 @@ if [ "$ENTRYPOINT_MODE" == "build_run" ];then
 		cp -Rf ${APP_SSL_SELFSIGNED_BASENAME}.* /dist/cli/conf/
 	fi
 
-	APP_GIT_COMMIT=$(cd /app && git rev-parse HEAD)
-	APP_GIT_DIRTY=$(cd /app && test -n "`git status --porcelain`" && echo "+CHANGES" || true)
-
 	if [ "$ENTRYPOINT_ECHO" == true ];then
 
 		echo " |    |-- APP_GIT_COMMIT:			${APP_GIT_COMMIT}"
@@ -149,6 +146,9 @@ case "$CASE" in
 
 		cd ${PROJECT_SOURCE_PATH}
 
+		APP_GIT_COMMIT=$(git rev-parse HEAD)
+		APP_GIT_DIRTY=$(test -n "`git status --porcelain`" && echo "+CHANGES" || true)
+
 		gox -os="linux darwin" -arch="amd64" -ldflags "-X main.GitCommit=${APP_GIT_COMMIT}${APP_GIT_DIRTY}" -output /dist/{{.Dir}}/xc/{{.OS}}/${PROJECT_NAME}-{{.OS}}-{{.Arch}}-{{.Dir}} $(glide novendor)
 
 		if [ -f "${APP_CLI}" ];then
@@ -189,7 +189,7 @@ case "$CASE" in
 
 	'cli')
 		if [ "$ENTRYPOINT_MODE" == "build_run" ];then	
-			GOOS=linux GOARCH=amd64 go build -ldflags "-X main.GitCommit=${APP_GIT_COMMIT}${APP_GIT_DIRTY}" -o /dist/${PROJECT_NAME}-linux-amd64-cli cmd/cli/*.go
+			GOOS=linux GOARCH=amd64 go build -o /dist/${PROJECT_NAME}-linux-amd64-cli cmd/cli/*.go
 			exec go /dist/${APP_NAME}-linux-amd64-cli $@
 		else
 			exec go run cmd/web/main.go $@
@@ -198,7 +198,7 @@ case "$CASE" in
 
 	'web')
 		if [ "$ENTRYPOINT_MODE" == "build_run" ];then	
-		  GOOS=linux GOARCH=amd64 go build -ldflags "-X main.GitCommit=${APP_GIT_COMMIT}${APP_GIT_DIRTY}" -o /dist/${PROJECT_NAME}-linux-amd64-web cmd/web/main.go
+		  GOOS=linux GOARCH=amd64 go build -o /dist/${PROJECT_NAME}-linux-amd64-web cmd/web/main.go
 		  exec go /dist/${PROJECT_NAME}-linux-amd64-web $@
 		else
 		  exec go run cmd/web/main.go $@
@@ -208,7 +208,7 @@ case "$CASE" in
 
 	'index')
 		if [ "$ENTRYPOINT_MODE" == "build_run" ];then
-			GOOS=linux GOARCH=amd64 go build -ldflags "-X main.GitCommit=${APP_GIT_COMMIT}${APP_GIT_DIRTY}" -o /dist/${PROJECT_NAME}-linux-amd64-cli cmd/cli/*.go
+			GOOS=linux GOARCH=amd64 go build -o /dist/${PROJECT_NAME}-linux-amd64-cli cmd/cli/*.go
 			exec go /dist/${PROJECT_NAME}-linux-amd64-cli index create --index=${APP_DATA_DIR:-"/data"}/${PROJECT_NAME}.index --mapping=${APP_INDEX_MAPPING_FILE:-"./bleve/mapping.json"}
 		else
 			exec go run cmd/cli/*.go index create --index=${APP_DATA_DIR:-"/data"}/${PROJECT_NAME}.index --mapping=${APP_INDEX_MAPPING_FILE:-"./bleve/mapping.json"}

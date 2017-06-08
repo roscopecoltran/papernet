@@ -20,6 +20,12 @@ APP_OPS_PATH      		:= "$(CURDIR)/$(APP_OPS_DIR)"
 APP_OPS_VCS_URI   		:= "https://github.com/bobinette/papernet-ops.git"
 APP_OPS_VCS_BRANCH		:= "master"
 
+## Addon - SEARX
+APP_ADDON_SEARX_DIR       		:= "addons/searx"
+APP_ADDON_SEARX_PATH      		:= "$(CURDIR)/$(APP_ADDON_SEARX_DIR)"
+APP_ADDON_SEARX_VCS_URI   		:= "https://github.com/asciimoo/searx.git"
+APP_ADDON_SEARX_VCS_BRANCH		:= "master"
+
 UNTAGGED_IMAGES := "docker images -a | grep "none" | awk '{print $$3}'"
 DOCKER_USERNAME := "bobinette"
 DOCKER_IMAGE_NAME := "papernet"
@@ -371,6 +377,20 @@ index:
 	go run cmd/cli/*.go index create --index=$(APP_DATA_DIR)/$(APP_NAME).index --mapping=$(APP_INDEX_MAPPING_FILE)
 
 # https://newfivefour.com/git-subtree-basics.html
+
+#### SEARX
+searx-add:
+	@ if [ ! -d "$(APP_ADDON_SEARX_PATH)" ]; then \
+		git subtree add --prefix $(APP_ADDON_SEARX_DIR) $(APP_ADDON_SEARX_VCS_URI) $(APP_ADDON_SEARX_VCS_BRANCH) --squash ; \
+	  else \
+		echo "Skipping request as remote repository was already added $(APP_ADDON_SEARX_VCS_URI)"; \
+	  fi
+
+searx-update:
+	@git subtree pull --prefix $(APP_ADDON_SEARX_DIR) $(APP_ADDON_SEARX_VCS_URI) $(APP_ADDON_SEARX_VCS_BRANCH) --squash
+
+searx-push:
+	@git subtree push --prefix $(APP_ADDON_SEARX_DIR) $(APP_ADDON_SEARX_VCS_URI) $(APP_ADDON_SEARX_VCS_BRANCH)
 
 #### WEB-UI
 webui-add:
