@@ -223,7 +223,7 @@ case "$CASE" in
 
 	;;
 
-	'bash++')
+	'bashplus')
 		if [ "${BASH_EXECUTABLE}" == "" ]; then
 			apk --update --no-cache add bash nano tree # --no-progress 
 		fi

@@ -43,15 +43,15 @@ include $(CURDIR)/scripts/makefile/golang.mk
 include $(CURDIR)/scripts/makefile/xc.mk	
 
 ## sub-projects helpers
-include $(CURDIR)/scripts/makefile/contribs.mk
-include $(CURDIR)/scripts/makefile/addons.mk
+include $(CURDIR)/scripts/makefile/contrib.mk
+include $(CURDIR)/scripts/makefile/experimental.mk
 include $(CURDIR)/scripts/makefile/aggregate.mk
 
-## sub-projects external addons helpers
-include $(CURDIR)/scripts/makefile/external/*.mk
+## sub-projects experimental addons helpers
+include $(CURDIR)/scripts/makefile/experimental/*.mk
 
-## sub-projects internal addons helpers
-include $(CURDIR)/scripts/makefile/internal/*.mk
+## sub-projects (official) addons helpers
+include $(CURDIR)/scripts/makefile/official/*.mk
 
 ## #################################################################
 ## Project docker info
@@ -163,14 +163,14 @@ deps:
 
 # docker targets
 
-docker-all: webui-add ops-add
+docker-build-all: webui-add ops-add
 	@echo "Building docker image for $(APP_NAME)"
 	@docker-compose -f docker-compose.dev.yml build backend_dev
-	@docker-compose -f docker-compose.dev.yml run backend_dev
+	#@docker-compose -f docker-compose.dev.yml run backend_dev xc
 	@docker-compose -f docker-compose.yml build cli
 	@docker-compose -f docker-compose.yml build web
 	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml build frontend_dev
-	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml run frontend_dev
+	#@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml run frontend_dev
 	#@docker-compose -f docker-compose.yml build web
 	@echo "Done."
 

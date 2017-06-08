@@ -1,0 +1,11 @@
+FROM scratch
+#FROM tianon/true
+MAINTAINER Rosco Pecoltran <rosco_pecoltran@msn.com>
+COPY ./papernet_web /app/papernet_web
+ADD ./conf /app/conf/
+VOLUME ["/app/data"]
+WORKDIR /app
+EXPOSE 1705
+ENV PATH=/app:$PATH
+ENTRYPOINT ["/app/papernet_web"]
+#ENTRYPOINT /papernet_web

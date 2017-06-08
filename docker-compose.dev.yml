@@ -48,6 +48,33 @@ services:
       - "org.label-schema.version=0.9.1"
       - "org.label-schema.docker.schema-version=1.0"
 
+  frontend_dev:    
+    image: papernet-front:alpine-nodejs-dev
+    container_name: frontend_dev
+    build: 
+      context: contrib/webui
+      dockerfile: Dockerfile.build
+    command: ["/bin/bash"]
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+    networks:
+     - default
+    volumes:
+      - ./dist/front/content:/dist
+    depends_on: ["backend_dev"]
+    links:
+      - backend_dev
+    #extra_hosts:
+    #  - "dockerhost:${DOCKER_HOST_IP}"
+    labels:
+      - "org.label-schema.vendor=bobinette"
+      - "org.label-schema.url=https://github.com/bobinette/papernet-front"
+      - "org.label-schema.name=Papernet - Front-end - Dev Container"
+      - "org.label-schema.description=Front-end of the papernet project."
+      - "org.label-schema.version=0.9.3"
+      - "org.label-schema.docker.schema-version=1.0"
+
 ### Networks Setup ############################################
 
 networks:

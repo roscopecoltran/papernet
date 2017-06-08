@@ -1,50 +1,52 @@
 FROM mhart/alpine-node:6
 MAINTAINER Rosco Pecoltran <rosco.pecoltran@msn.com>
 
-ARG GOSU_VERSION=${GOSU_VERSION:-1.10}
+ARG GOSU_VERSION=${GOSU_VERSION:-"1.10"}
 
-# some deps examples for specific nodejs packages:
-#  - dynomite:  build-base git autoconf automake libtool gettext openssl-dev
-#  - phantomjs: nodejs nodejs-npm xpdf vips vips-dev python2 git make fftw-dev g++ curl
-#  - libsass-dev 
-#  build-base perl python giflib-dev
+# List of packages that need to be installed for node_modules to compile
+ARG APK_PACKAGES_BUILD=${APK_PACKAGES_BUILD:-"tar git curl make gcc g++ python linux-headers paxctl libgcc libstdc++"}
 
-# build-base perl python => node-sass
-# ARG ALPINE_PKG_BUILD="make nasm gcc g++ musl-dev build-base perl python libtool automake autoconf git jpeg-dev libpng-dev giflib-dev musl libx11"
-ARG ALPINE_PKG_BUILD="git curl make gcc g++ python linux-headers paxctl libgcc libstdc++"
-ARG ALPINE_PKG_RUNTIME="ca-certificates openssl jpeg libpng giflib"
-ARG ALPINE_PKG_INTERACTIVE="bash nano tree"
-ARG ALPINE_PKG_DEL_STACKS="INTERACTIVE BUILD"
+# List of additional/custom packages that need to be installed for running the container in an interactive mode.
+ARG APK_PACKAGES_INTERACTIVE=${APK_PACKAGES_INTERACTIVE:-"bash nano tree"}
 
-# dev/dist
-ARG APP_CONTAINER_MODE="dist"  
+# List of additional/custom packages that need to be installed for node_modules to compile (eg.libjpeg,...)
+ARG APK_PACKAGES_RUNTIME=${APK_PACKAGES_RUNTIME:-""}
 
-# Install Gosu to /usr/local/bin/gosu
+# Test
 ADD https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64 /usr/local/sbin/gosu
 
-# Install runtime dependencies & create runtime user
-RUN chmod +x /usr/local/sbin/gosu \
-    && adduser -D app -h /data -s /bin/sh
+# Copy dependencies list
+ADD package.json /code/package.json
 
-WORKDIR /src
+# npm cache clean
+RUN apk add --update --no-cache ${APK_PACKAGES_INTERACTIVE} ${APK_PACKAGES_RUNTIME} \
+    && apk --no-cache add --virtual devs ${APK_PACKAGES_BUILD} \
+    && curl --silent --show-error --fail --location \
+        --header "Accept: application/tar+gzip, application/x-gzip, application/octet-stream" -o - \
+        "https://caddyserver.com/download/linux/amd64?plugins=http.authz,http.cors,http.expires,http.git,http.ipfilter,http.minify,http.ratelimit,http.realip,http.upload,net,tls.dns.gandi,tls.dns.googlecloud,tls.dns.linode,tls.dns.ovh,tls.dns.route53" \
+        | tar --no-same-owner -C /usr/bin/ -xz caddy \
+    && mv /usr/bin/caddy /usr/bin/caddy \
+    && chmod 0755 /usr/bin/caddy \
+    && chmod +x /usr/local/sbin/gosu \
+	&& adduser -D app -h /data -s /bin/sh \
+	&& mkdir -p /code/aoo \
+	&& cd /code \
+    && npm install -g -s --no-progress yarn npm-check-updates \
+    && yarn install
 
-# Copy source code to the container & build it
-COPY . .
+#    && apk del --no-cache ${APK_PACKAGES_BUILD} \
+#    && apk --no-cache --no-progress del devs
 
-# fetch and build dependencies
-RUN ./docker/build.sh
+WORKDIR /code
+ADD . /code
 
-# NSSwitch configuration file
-COPY docker/nsswitch.conf /etc/nsswitch.conf
+RUN yarn run build \
+    && mkdir -p /dist \
+    && cp -Rf /code/app/* /dist/ \
+    && yarn cache clean \
+    && chmod +x docker/entrypoint.sh
 
-# Container configuration
-VOLUME ["/data"]
+VOLUME ["/dist"]
 EXPOSE 8080
-CMD ["/usr/local/sbin/gosu", "app", "./docker-entrypoint.sh"]
 
-# available entrypoints
-# CMD ["./docker-entrypoint.sh", "dev"]        	# dev mode 
-# CMD ["./docker-entrypoint.sh", "build"]      	# build distribution version
-# CMD ["./docker-entrypoint.sh", "test"]       	# unit-tests
-# CMD ["./docker-entrypoint.sh", "mocha"]      	# mocha
-# CMD ["./docker-entrypoint.sh", "mocha-watch"]	# mocha
+CMD ["./docker/entrypoint.sh", "build"]

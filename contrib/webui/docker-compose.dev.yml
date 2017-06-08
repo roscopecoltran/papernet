@@ -1,0 +1,56 @@
+version: '2.1'
+
+services:
+
+### Applications Code Container #############################
+
+  frontend_dev:    
+    image: papernet-front:alpine-nodejs-dev
+    container_name: frontend_dev
+    build: 
+      context: .
+      dockerfile: Dockerfile.build
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+    command: ["./docker/entrypoint.sh", "build"] # dev, devv, build, bash, bashplus
+    networks:
+     - default
+    volumes:
+      - .:/code
+      - ./app/content:/dist
+    #extra_hosts:
+    #  - "dockerhost:${DOCKER_HOST_IP}"
+    labels:
+      - "org.label-schema.vendor=bobinette"
+      - "org.label-schema.url=https://github.com/bobinette/papernet-front"
+      - "org.label-schema.name=Papernet - Front-end - Dev Container"
+      - "org.label-schema.description=Front-end of the papernet project."
+      - "org.label-schema.version=0.9.3"
+      - "org.label-schema.docker.schema-version=1.0"  
+
+  web:
+    image: papernet-web:scratch-latest
+    container_name: web
+    ports:
+      - 1705:1705
+    restart: unless-stopped
+    entrypoint: /app/papernet_web
+    networks:
+      - default
+    volumes:
+      - ./api/data:/app/data
+      - ./api/configuration/certs:/app/conf
+    labels:
+      - "org.label-schema.vendor=bobinette"
+      - "org.label-schema.url=https://github.com/bobinette/papernet"
+      - "org.label-schema.name=Papernet - Web API"
+      - "org.label-schema.description=Very simple tool to keep track of the papers you read."
+      - "org.label-schema.version=0.9.1"
+      - "org.label-schema.docker.schema-version=1.0"   
+
+### Volumes Setup #############################################
+
+volumes:
+  papernet_data:
+    driver: 'local'

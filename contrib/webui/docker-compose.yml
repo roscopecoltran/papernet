@@ -4,89 +4,49 @@ services:
 
 ### Applications Code Container #############################
 
-  #applications:
-  #  image: tianon/true
-  #  volumes:
-  #    - ${APPLICATION}:/var/www
-
-  onbuild_front:    
-    image: alpine-node6-onbuild-extended:latest
-    build: 
-      context: .
-      dockerfile: Dockerfile.onbuild
-
-  # backend
-  #  image: papernet-back
-  #  build:
-  #    context: Dockerfile.backend
-  #    args:
-  #      - APP_CONTAINER_MODE=dist # dev (default), dist,both
-  #      - PROJECT_URI="github.com/bobinette/papernet"
-  # user: bobinette
-  # privileged: true
-  # read_only: true
-  #  depends_on: ["onbuild_back"]
-  #  ports:
-  #    - 1705:1705
-  #  networks:
-  #    - frontend
-  #    - backend
-
-  frontend_dist: # Caddy based 
-    image: papernet-front
-    container_name: frontend_dev
+  frontend: # Caddy based 
+    image: papernet-front:caddy-latest
+    container_name: frontend
     build: 
       context: app
       dockerfile: Dockerfile
-    #hostname: papernet
-    # read_only: true
     #extra_hosts:
     #  - "dockerhost:${DOCKER_HOST_IP}"
     ports:
       - 8080:8080
     restart: unless-stopped
+    depends_on: ["backend"]
     command: ["/usr/bin/caddy", "-conf", "/etc/Caddyfile"]
-    #network_mode: "host"
     networks:
      - default
-    #networks:
-    #  - frontend
-    #  - backend
-    #  - proxy-network
-    #labels:
-    #  - "bobinette.frontend.rule=Host:bobinette.papernet.online"
+    labels:
+      - "org.label-schema.vendor=bobinette"
+      - "org.label-schema.url=https://github.com/bobinette/papernet-front"
+      - "org.label-schema.name=Papernet - Front-end - Dev Container"
+      - "org.label-schema.description=Front-end of the papernet project."
+      - "org.label-schema.version=0.9.3"
+      - "org.label-schema.docker.schema-version=1.0"
 
-  frontend_dev:    
-    image: papernet-front:alpine-nodejs-dev
-    container_name: frontend_dev2
-    build: 
-      context: .
-      dockerfile: Dockerfile.front.build
-    #hostname: papernet
-    #user: bobinette
-    # privileged: true
-    # read_only: true
-    #extra_hosts:
-    #  - "dockerhost:${DOCKER_HOST_IP}"
+  web:
+    image: papernet-web:scratch-latest
+    container_name: web
     ports:
-      - 8081:8080
+      - 1705:1705
     restart: unless-stopped
-    command: ["/bin/bash"]
+    entrypoint: /app/papernet_web
+    # command: ["--port", "1705"]
     networks:
-     - default
+      - default
     volumes:
-      - ./app:/dist
-    #  - papernet_data:/data
-    #  - ./docker/logs/rabbitmq:/logs
-    #command: ["npm","run","dev"]
-    #links:
-    #  - backend
-    #networks:
-    #  - frontend
-    #  - backend
-    #  - proxy-network
-    #labels:
-    #  - "bobinette.frontend.rule=Host:bobinette.papernet.online"
+      - ./api/data:/app/data
+      - ./api/configuration/certs:/app/conf
+    labels:
+      - "org.label-schema.vendor=bobinette"
+      - "org.label-schema.url=https://github.com/bobinette/papernet"
+      - "org.label-schema.name=Papernet - Web API"
+      - "org.label-schema.description=Very simple tool to keep track of the papers you read."
+      - "org.label-schema.version=0.9.1"
+      - "org.label-schema.docker.schema-version=1.0"
 
 ### Networks Setup ############################################
 

@@ -9,6 +9,20 @@ services:
     volumes:
       - ./data:/app/data           # shared volume for data and index mapping
   
+  front:
+    image: papernet-front:caddy-latest
+    container_name: front
+    build: 
+      context: dist/front
+      dockerfile: Dockerfile.alpine.caddy
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+    command: ["/usr/bin/caddy", "-conf", "/etc/Caddyfile"]
+    #network_mode: "host"
+    networks:
+     - default
+
   cli:
     image: papernet-cli:scratch-latest
     container_name: cli
@@ -33,7 +47,7 @@ services:
       - "org.label-schema.docker.schema-version=1.0"
 
   web:
-    image: papernet-api:scratch-latest
+    image: papernet-web:scratch-latest
     container_name: web
     build: 
       context: ./dist/web

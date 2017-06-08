@@ -9,3 +9,26 @@
 - https://github.com/commonsearch/cosr-front
 - http://sciencetogether.online/tools/
 - https://github.com/NiR-/docker-generator/
+- https://github.com/fangpenlin/crane
+- https://github.com/buildbot/buildbot
+- https://github.com/buildbot/buildbot_travis
+- https://github.com/buildbot/buildbot
+- https://github.com/buildbot/buildbot-infra
+- https://github.com/buildbot/metabbotcfg
+- https://github.com/buildbot/buildbot-contrib
+- https://github.com/buildbot/buildbot-docker-example-config
+- https://github.com/buildbot/generator-buildbot-dashboard
+- https://github.com/buildbot/buildbot-master-buildpack
+- https://github.com/webplates/dockermatrix
+- https://github.com/aio-libs/aiodocker
+- https://github.com/aio-libs/aiohttp_admin
+- https://github.com/timdaman/check_docker
+- https://github.com/funkwerk/compose_format
+
+
+- https://github.com/rakhimov/cppdep
+- https://github.com/rizsotto/scan-build
+- https://github.com/ChristopherRabotin/bungiesearch
+- https://github.com/mkobos/tree_crawler
+- https://github.com/coderefinery/autocmake
+- https://github.com/fangpenlin/crane
