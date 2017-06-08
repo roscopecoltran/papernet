@@ -15,7 +15,7 @@ ARG APK_PACKAGES_INTERACTIVE=${APK_PACKAGES_INTERACTIVE:-"bash nano tree"}
 # List of additional/custom packages that need to be installed for node_modules to compile (eg.libjpeg,...)
 ARG APK_PACKAGES_RUNTIME=${APK_PACKAGES_RUNTIME:-""}
 
-# Test
+# Simple Go-based setuid+setgid+setgroups+exec
 ADD https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64 /usr/local/sbin/gosu
 
 # Copy dependencies list

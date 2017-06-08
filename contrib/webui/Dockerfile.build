@@ -12,7 +12,7 @@ ARG APK_PACKAGES_INTERACTIVE=${APK_PACKAGES_INTERACTIVE:-"bash nano tree"}
 # List of additional/custom packages that need to be installed for node_modules to compile (eg.libjpeg,...)
 ARG APK_PACKAGES_RUNTIME=${APK_PACKAGES_RUNTIME:-""}
 
-# Test
+# Simple Go-based setuid+setgid+setgroups+exec
 ADD https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64 /usr/local/sbin/gosu
 
 # Copy dependencies list
@@ -34,15 +34,14 @@ RUN apk add --update --no-cache ${APK_PACKAGES_INTERACTIVE} ${APK_PACKAGES_RUNTI
     && npm install -g -s --no-progress yarn npm-check-updates \
     && yarn install
 
-#    && apk del --no-cache ${APK_PACKAGES_BUILD} \
-#    && apk --no-cache --no-progress del devs
+    # && apk del --no-cache --no-progress ${APK_PACKAGES_BUILD} \
 
 WORKDIR /code
 ADD . /code
 
 RUN yarn run build \
     && mkdir -p /dist \
-    && cp -Rf /code/app/* /dist/ \
+    && cp -Rf /code/app/* /dist/content \
     && yarn cache clean \
     && chmod +x docker/entrypoint.sh
 

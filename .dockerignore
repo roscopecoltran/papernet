@@ -1,15 +1,14 @@
-data/*
+
+#.git/*/
+#!.git/HEAD
+#!.git/FETCH_HEAD
+
 !data/mapping.json
 
-contrib
-contrib/
-contrib/*
-contrib/**
-
-addons
-addons/
-addons/*
-addons/**
+./contrib*
+./addons*
+./vendor*
+data/*
 
 docker-compose.*
 *.md
@@ -27,16 +26,6 @@ scripts/**
 
 !dist/web/papernet_web
 !dist/web/conf/*
-
-# site/
-
-# contrib
-# contrib/
-# contrib/**
-
-vendor
-vendor/
-vendor/*
 
 # Credentials
 oauth_*.json

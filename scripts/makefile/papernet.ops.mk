@@ -20,3 +20,7 @@ papernet.ops.update:
 papernet.ops.push:
 	@git subtree push --prefix $(APP_OPS_DIR) $(APP_OPS_VCS_URI) $(APP_OPS_VCS_BRANCH)
 
+papernet.ops.remove:
+	@rm -fR $(APP_OPS_DIR)
+
+papernet.subtree.ops: papernet.ops.update

@@ -131,6 +131,27 @@ docker.is.cache:
 	@echo " - DOCKER_BUILD_NOCACHE=$(DOCKER_BUILD_NOCACHE)"
 	@echo " - DOCKER_BUILD_CACHE_ARG=$(DOCKER_BUILD_CACHE_ARG)"
 
+docker.clean.volumes: 
+	@echo "Removing dangling volumes..."
+	@docker volume rm $$(docker volume ls -qf dangling=true) && echo "Done."; \
+	if [ $$? -ne 0 ]; then \
+		echo "Could not find any dangling volumes. Skipping..."; \
+	fi
+
+docker.clean.images: 
+	@echo "Removing untagged images..."
+	@docker rmi $$($(UNTAGGED_IMAGES)) && echo "Done."; \
+	if [ $$? -ne 0 ]; then \
+		echo "Could not find any untagged images. Skipping..."; \
+	fi
+
+docker.clean: docker.clean.volumes docker.clean.images
+
+#docker.pull.images:
+#	for f in $(shell find ./integration/resources/compose/ -type f); do \
+#		docker-compose -f $$f pull; \
+#	done
+
 .build/%/Dockerfile.d: docker/build/%/Dockerfile Makefile
 	@mkdir -p .build/$*
 	$(eval FROM=$(shell grep "^\s*FROM" $< | sed -E "s/FROM //" | sed -E "s/:/@/g"))

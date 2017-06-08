@@ -21,14 +21,11 @@ papernet.webui.update:
 papernet.webui.push:
 	@git subtree push --prefix $(APP_WEBUI_DIR) $(APP_WEBUI_VCS_URI) $(APP_WEBUI_VCS_BRANCH)
 
-papernet.webui.docker:
-	@echo "Build Docker container 'DEV' for $(APP_NAME) front-end"
-	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml build --no-cache=$(DOCKER_BUILD_NOCACHE) frontend_dev
-	@echo "Building static version of $(APP_NAME) front-end"
-	@docker-compose -f $(CURDIR)/contrib/webui/docker-compose.dev.yml run frontend_dev build
-	@ls -l $(CURDIR)/dist/front/content
-	@echo "Done."
-
 papernet.webui.clean:
 	@rm -fR $(DIST_PATH)/front/content/*
 	@rm -fR $(APP_WEBUI_DIR)/app/content/*
+
+papernet.webui.remove:
+	@rm -fR $(APP_WEBUI_DIR)
+
+papernet.subtree.webui: papernet.webui.update

@@ -37,7 +37,7 @@ ARG ALPINE_PKG_RUNTIME="ca-certificates openssl"
 ARG ALPINE_PKG_INTERACTIVE="bash nano tree"
 ARG ALPINE_PKG_DEL_STACKS="INTERACTIVE BUILD"
 
-# Install Gosu to /usr/local/bin/gosu
+# Install Gosu to /usr/local/bin/gosu (Simple Go-based setuid+setgid+setgroups+exec)
 ADD https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64 /usr/local/sbin/gosu
 
 # Add sources

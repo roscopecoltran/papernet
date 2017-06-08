@@ -5,7 +5,7 @@
 
 xc-local: deps
 	@go get -u -v github.com/mitchellh/gox	
-	@gox -os="darwin linux" -arch="386 amd64" -output $(BIND_PATH)/{{.Dir}}/papernet-{{.OS}}-{{.Arch}}-{{.Dir}} ./cmd/...
+	@gox -os="darwin linux" -arch="386 amd64" -output $(DIST_PATH)/{{.Dir}}/$(APP_NAME)-{{.OS}}-{{.Arch}}-{{.Dir}} ./cmd/...
 
 xc: generate-webui build ## cross build the non-linux binaries
 	$(DOCKER_RUN_PAPERNET) $(SCRIPTS_PATH)/make.sh generate xc

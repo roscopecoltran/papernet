@@ -36,6 +36,18 @@ platform_v := $(shell node -v | cut -f 1,2 -d .)
 platform_t ?= v6.5
 
 ## #################################################################
+## COMPARE VERSION
+## #################################################################
+
+# This task allows restricting other tasks to be run only when platform versions match expectations
+err_platform_mismatch = Platform version mismatch: current: $(platform_v), required: $(platform_t)
+
+platform-version:
+	$(if platform_v, , $(error Failed to detect current platform via platform_v))
+	$(if platform_t, , $(error Target platform not specified - set it via platform_t))
+	$(if $(filter-out $(platform_v), $(platform_t)), $(error $(err_platform_mismatch)))
+
+## #################################################################
 ## NPM - INSTALL DEPS
 ## #################################################################
 
@@ -110,5 +122,5 @@ testflags ?= --check-leaks --no-exit
 test: node_modules
 	@$(bindir)mocha $(testflags)	
 
-.PHONY: clean-coverage test coveralls clean-docs clean-install lint
+.PHONY: clean-coverage test coveralls clean-docs clean-install lint platform-version
 
